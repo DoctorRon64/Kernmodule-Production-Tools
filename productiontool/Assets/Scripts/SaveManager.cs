@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+public class SaveFileOfAllData
+{
+    public Dictionary<string, object> saveData = new Dictionary<string, object>();
+}
+
 public interface ISaveable
 {
-    Dictionary<string, object> SaveData();
+    void Load();
+    object Save();
 }
 
 public class SaveManager : MonoBehaviour
@@ -25,12 +31,12 @@ public class SaveManager : MonoBehaviour
             fullPath = Path.Combine(Application.persistentDataPath, fileName + ".json");
         }
 
-        Save(fileName);
+        SaveTool(fileName);
     }
 
-    public void Save(string saveFileName)
+    public void SaveTool(string saveFileName)
     {
-        List<Dictionary<string, object>> saveDataList = new List<Dictionary<string, object>>();
+        SaveFileOfAllData saveFileOfAllData = new SaveFileOfAllData();
         MonoBehaviour[] allMonoBehaviours = FindObjectsOfType<MonoBehaviour>();
         try
         {
@@ -38,8 +44,8 @@ public class SaveManager : MonoBehaviour
             {
                 if (monoBehaviour is ISaveable saveable)
                 {
-                    saveDataList.Add(saveable.SaveData());
-                    SaveToFile(saveDataList);
+                    //hasid toevoegen
+                    saveFileOfAllData.saveData.Add(saveable.GetType().Name , saveable.Save());
                 }
             }
         }
@@ -47,9 +53,10 @@ public class SaveManager : MonoBehaviour
         {
             Debug.LogError("no reference found! " + e);
         }
+        SaveToFile(saveFileOfAllData);
     }
 
-    private void SaveToFile<T>(T saveData)
+    private void SaveToFile(SaveFileOfAllData saveData)
     {
         //!File.Exists(fullPath);
         //if the file already excists ask the player if he wants to overwrite the save file
@@ -62,5 +69,4 @@ public class SaveManager : MonoBehaviour
             Debug.Log("Game saved to: " + fullPath);
         }
     }
-
 }

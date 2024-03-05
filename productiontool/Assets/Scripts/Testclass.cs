@@ -7,14 +7,13 @@ public class Testclass : MonoBehaviour, ISaveable
     public string hallo = "apdfas ralph hallo";
     public float kipje = 10.23f;
 
-    public Dictionary<string, object> SaveData()
+    public void Load()
     {
-        Dictionary<string, object> data = new Dictionary<string, object>();
 
-        data.Add("hey", hey);
-        data.Add("hallo", hallo);
-        data.Add("kipje", kipje);
+    }
 
-        return data;
+    public object Save()
+    {
+        return this;
     }
 }

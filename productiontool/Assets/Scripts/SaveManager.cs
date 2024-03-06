@@ -51,7 +51,6 @@ public class SaveManager : MonoBehaviour
                 saveable.Save();
             }
         }
-
         SaveToFile();
     }
 
@@ -85,7 +84,6 @@ public class SaveManager : MonoBehaviour
             }
         }
     }
-
     private void LoadFromFile()
     {
         if (!File.Exists(fullPath)) return;

@@ -1,18 +1,13 @@
 using System.IO;
 using UnityEngine;
 
-public interface ISaveable
-{
-    void Load();
-    void Save();
-}
-
 public class SaveManager : MonoBehaviour
 {
     [SerializeField] private string fileName = "StandardSaveFile";
     private string fullPath;
     public bool overwrite = false;
     private MonoBehaviour[] allMonoBehaviours;
+
     private void Awake()
     {
         allMonoBehaviours = FindObjectsOfType<MonoBehaviour>();

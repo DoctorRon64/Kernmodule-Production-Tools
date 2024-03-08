@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public enum SelectedTool {
+public enum SelectedTool
+{
     None,
     Selector,
     Scale,
@@ -10,7 +9,7 @@ public enum SelectedTool {
     Eraser,
 }
 
-public class ToolManager
+public class ToolManager : MonoBehaviour
 {
-    private SelectedTool selectedTool = SelectedTool.None;
+    private SelectedTool SelectedTool = SelectedTool.None;
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
 public class Note
 {
@@ -10,7 +11,7 @@ public class Note
 
 public class NoteManager : ISaveable
 {
-    Dictionary<string, Note> noteDatabase = new Dictionary<string, Note>();
+    private Dictionary<string, Note> noteDatabase = new Dictionary<string, Note>();
 
     public void PlaceNote(float _pitch, int _pos)
     {
@@ -41,11 +42,11 @@ public class NoteManager : ISaveable
 
     public void Load()
     {
-        this.noteDatabase = DataManager.Instance.noteDatabase;
+        this.noteDatabase = GameManager.Instance.DataManager.noteDatabase;
     }
 
     public void Save()
     {
-        DataManager.Instance.noteDatabase = this.noteDatabase;
+        GameManager.Instance.DataManager.noteDatabase = this.noteDatabase;
     }
 }

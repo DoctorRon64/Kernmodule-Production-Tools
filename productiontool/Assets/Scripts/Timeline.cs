@@ -2,20 +2,29 @@ using System.Timers;
 
 public class Timeline : ISaveable
 {
-    public int currentTimePos;
-    public int TimelineLength;
+    private int currentTimePos;
+    private int TimelineLength;
+    private bool repeatTimeline;
     private Timer timer;
-
+    private DataManager dataManager;
+    
+    public Timeline()
+    {
+        dataManager = GameManager.Instance.DataManager;
+    }
+    
     public void Load()
     {
-        this.currentTimePos = DataManager.Instance.currentTimePos;
-        this.TimelineLength = DataManager.Instance.TimelineLength;
+        this.currentTimePos = dataManager.currentTimePos;
+        this.TimelineLength = dataManager.TimelineLength;
+        this.repeatTimeline = dataManager.repeatTimeline;
     }
 
     public void Save()
     {
-        DataManager.Instance.currentTimePos = this.currentTimePos;
-        DataManager.Instance.TimelineLength = this.TimelineLength;
+        dataManager.currentTimePos = this.currentTimePos;
+        dataManager.TimelineLength = this.TimelineLength;
+        dataManager.repeatTimeline = this.repeatTimeline;
     }
 
     public void StartTimeline()
@@ -31,13 +40,36 @@ public class Timeline : ISaveable
         }
     }
 
+    public void PauseTimeline()
+    {
+        if (timer == null) return;
+        timer.Enabled = !timer.Enabled;
+    }
+    
+    public void stopTimeline()
+    {
+        timer.Stop();
+    }
+
+    public void RepeatTimeline(bool _repeat)
+    {
+        repeatTimeline = _repeat;
+    }
+
     private void TimerElapsed(object sender, ElapsedEventArgs e)
     {
         currentTimePos++;
         if (currentTimePos >= TimelineLength)
         {
-            timer.Stop();
-            // Optionally, you might raise an event here to notify the completion of the timeline
+            if (repeatTimeline)
+            {
+                StartTimeline();
+            }
+            else
+            {
+                stopTimeline();
+            }
+            //mischien event raisen
         }
     }
 

@@ -7,19 +7,12 @@ public class SaveManager : MonoBehaviour
     private string fullPath;
     public bool overwrite = false;
     private MonoBehaviour[] allMonoBehaviours;
-
+    
     private void Awake()
     {
         allMonoBehaviours = FindObjectsOfType<MonoBehaviour>();
 
-        if (Application.isEditor)
-        {
-            fullPath = Path.Combine(Application.dataPath, fileName + ".json");
-        }
-        else
-        {
-            fullPath = Path.Combine(Application.persistentDataPath, fileName + ".json");
-        }
+        fullPath = Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath, fileName + ".json");
 
         SaveTool(fileName);
     }
@@ -36,7 +29,7 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    public void SaveTool(string saveFileName)
+    private void SaveTool(string saveFileName)
     {
         foreach (MonoBehaviour monoBehaviour in allMonoBehaviours)
         {
@@ -56,7 +49,7 @@ public class SaveManager : MonoBehaviour
             //ask the player to overwrite the file?
         }
         bool shouldOverwrite = overwrite;
-        string jsonData = JsonUtility.ToJson(DataManager.Instance, true);
+        string jsonData = JsonUtility.ToJson(GameManager.Instance.DataManager, true);
 
         StreamWriter writer = new StreamWriter(fullPath, shouldOverwrite);
         writer.WriteLine(jsonData);
@@ -84,7 +77,7 @@ public class SaveManager : MonoBehaviour
         if (!File.Exists(fullPath)) return;
         
         StreamReader reader = new StreamReader(fullPath);
-        DataManager.Instance = JsonUtility.FromJson<DataManager>(reader.ReadToEnd());
+        GameManager.Instance.DataManager = JsonUtility.FromJson<DataManager>(reader.ReadToEnd());
         reader.Close();
         reader.Dispose();
 

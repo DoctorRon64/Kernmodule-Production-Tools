@@ -1,23 +1,34 @@
-﻿using UnityEngine;
+﻿using System;
 using UnityEngine.UI;
 
-public class ToolButton : MonoBehaviour
+public class ToolButton
 {
-    public ToolType toolType;
+    private readonly Button button;
+    private readonly int toolIndex;
+    private Action<int> onClickToolButton;
 
-    void Start()
+    public ToolButton(Button _button, int _toolIndex)
     {
-        
-        GetComponent<Button>().onClick.AddListener(OnClick);
+        this.toolIndex = _toolIndex;
+        this.button = _button;
+        this.onClickToolButton = null;
+        button.onClick.AddListener(OnClick);
     }
 
-    void OnClick()
+    public void RemoveAllListeners()
     {
-        GameManager.Instance.UIManager?.SelectTool(toolType);
+        onClickToolButton = null;
+        button.onClick.RemoveAllListeners();
     }
 
-    private void OnDisable()
+    public void AddListener(Action<int> _onClickCallback)
     {
-        GetComponent<Button>().onClick.RemoveAllListeners();
+        if (button == null) return;
+        onClickToolButton += _onClickCallback;
+    }
+    
+    private void OnClick()
+    {
+        onClickToolButton?.Invoke(toolIndex);
     }
 }

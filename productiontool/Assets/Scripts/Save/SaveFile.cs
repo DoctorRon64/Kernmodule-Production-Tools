@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public class DataManager
+public class SaveFile
 {
     //Timeline
     public int currentTimePos = 0;

@@ -6,25 +6,25 @@ public class Timeline : ISaveable
     private int TimelineLength;
     private bool repeatTimeline;
     private Timer timer;
-    private DataManager dataManager;
+    private SaveFile saveFile;
     
     public Timeline()
     {
-        dataManager = GameManager.Instance.DataManager;
+        saveFile = GameManager.Instance.saveFile;
     }
     
     public void Load()
     {
-        this.currentTimePos = dataManager.currentTimePos;
-        this.TimelineLength = dataManager.TimelineLength;
-        this.repeatTimeline = dataManager.repeatTimeline;
+        this.currentTimePos = saveFile.currentTimePos;
+        this.TimelineLength = saveFile.TimelineLength;
+        this.repeatTimeline = saveFile.repeatTimeline;
     }
 
     public void Save()
     {
-        dataManager.currentTimePos = this.currentTimePos;
-        dataManager.TimelineLength = this.TimelineLength;
-        dataManager.repeatTimeline = this.repeatTimeline;
+        saveFile.currentTimePos = this.currentTimePos;
+        saveFile.TimelineLength = this.TimelineLength;
+        saveFile.repeatTimeline = this.repeatTimeline;
     }
 
     public void StartTimeline()

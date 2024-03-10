@@ -1,30 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using Object = UnityEngine.Object;
 
 public class Note
 {
-    public string id;
-    public float pitch;
-    public int pos;
+    public string ID;
+    public float Pitch;
+    public int Pos;
 }
 
 public class NoteManager : ISaveable
 {
     private Dictionary<string, Note> noteDatabase = new Dictionary<string, Note>();
+    private readonly GameManager gameManager;
 
+    public NoteManager(GameManager _gameManager)
+    {
+        this.gameManager = _gameManager;
+    }
+    
     public void PlaceNote(float _pitch, int _pos)
     {
         string hashId = GenerateId();
         if (noteDatabase.ContainsKey(hashId)) return;
 
-        Note newNote = new Note()
+        var newNote = new Note()
         {
-            id = hashId,
-            pitch = _pitch,
-            pos = _pos,
+            ID = hashId,
+            Pitch = _pitch,
+            Pos = _pos,
         };
-        noteDatabase.Add(newNote.id, newNote);
+        noteDatabase.Add(newNote.ID, newNote);
     }
 
     private string GenerateId()
@@ -34,19 +39,19 @@ public class NoteManager : ISaveable
 
     public void RemoveNote(Note _note)
     {
-        if (!noteDatabase.ContainsKey(_note.id)) return;
-        noteDatabase.Remove(_note.id);
+        if (!noteDatabase.ContainsKey(_note.ID)) return;
+        noteDatabase.Remove(_note.ID);
     }
 
     //handleInput
 
     public void Load()
     {
-        this.noteDatabase = GameManager.Instance.DataManager.noteDatabase;
+        this.noteDatabase = gameManager.saveFile.noteDatabase;
     }
 
     public void Save()
     {
-        GameManager.Instance.DataManager.noteDatabase = this.noteDatabase;
+        gameManager.saveFile.noteDatabase = this.noteDatabase;
     }
 }

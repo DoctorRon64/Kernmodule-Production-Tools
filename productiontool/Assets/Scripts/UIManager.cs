@@ -1,30 +1,30 @@
 ﻿using System;
-using UnityEngine;
+using System.Collections.Generic;
 
 public class UIManager
 {
-    public event Action<ToolType> OnToolSelected;
-
-    public void SelectTool(ToolType _toolType) {
-        OnToolSelected?.Invoke(_toolType);
-        Debug.Log(_toolType);
-    }
-}
-
-public enum ToolType
-{
-    None,
-    Selector,
-    Scale,
-    Brush,
-    Eraser,
-}
-
-public class ToolManager
-{
-    public ToolType ToolType = ToolType.None;
-    public void SetSelectedTool(ToolType _toolType)
+    private readonly GameManager gameManager;
+    private readonly List<ToolButton> toolButtons = new List<ToolButton>();
+    
+    public UIManager(GameManager _gameManager)
     {
-        ToolType = _toolType;
+        this.gameManager = _gameManager;
+    }
+
+    public void InitializeToolButtons(List<ToolButton> _toolbuttons, Action<int> _onClickCallback)
+    {
+        foreach (var toolButton in _toolbuttons)
+        {
+            toolButton.AddListener(_onClickCallback);
+            toolButtons.Add(toolButton);
+        }
+    }
+    
+    public void RemoveListeners()
+    {
+        foreach (var toolButton in toolButtons)
+        {
+            toolButton.RemoveAllListeners();
+        }
     }
 }

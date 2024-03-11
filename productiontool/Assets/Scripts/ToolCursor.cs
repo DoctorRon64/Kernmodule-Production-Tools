@@ -1,23 +1,30 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ToolCursor
 {
-    private SpriteRenderer cursorImage;
+    private readonly SpriteRenderer cursorImage;
 
     public ToolCursor(SpriteRenderer _render)
     {
         cursorImage = _render;
+        if (cursorImage == null) Debug.LogError("No cursor image assigned.");
     }
-    
-    public void UpdateCursorPosition(Vector2 _pos)
+
+    public void UpdateCursorPosition(Vector3 _pos)
     {
-        if (cursorImage == null) return; Debug.LogError("no cursor");
+        if (cursorImage == null) { Debug.LogError("No cursor image assigned."); return; }
         cursorImage.transform.position = _pos;
     }
 
     public void ChangeCursorImage(Sprite _image)
     {
-        cursorImage.sprite = _image;
+        if (cursorImage != null)
+        {
+            cursorImage.sprite = _image;
+        }
+        else
+        {
+            Debug.LogError("No cursor image assigned.");
+        }
     }
 }

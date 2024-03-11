@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,11 +26,12 @@ public class GameManager : MonoBehaviour
         
         for (var i = 0; i < buttons.Count; i++)
         {
-            toolButtons.Add(new ToolButton(buttons[i], i));
+            toolButtons.Add(new ToolButton(buttons[i], i + 1));
         }
         
         uiManager.InitializeToolButtons(toolButtons, SetCurrentSelectedTool);
-        saveManager.AddSaveble(toolManager);
+        //add saveables
+        //saveManager.AddSaveble(toolManager);
         
     }
 
@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         saveFile = new SaveFile();
-        toolManager = new ToolManager(Instance);
+        toolManager = new ToolManager();
         saveManager = new SaveManager();
         uiManager = new UIManager(Instance);
         cursor = new ToolCursor(cursorImageRenderer);
@@ -47,7 +47,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        var mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         cursor.UpdateCursorPosition(mouseWorldPosition);
     }
 

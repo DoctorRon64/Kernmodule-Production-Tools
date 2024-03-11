@@ -11,7 +11,4 @@ public class SaveFile
     
     //notes
     public Dictionary<string, Note> NoteDatabase = new Dictionary<string, Note>();
-    
-    //Tools
-    public int CurrentSelectedTool = 0;
 }

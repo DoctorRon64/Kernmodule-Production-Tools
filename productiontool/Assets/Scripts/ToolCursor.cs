@@ -12,7 +12,6 @@ public class ToolCursor
     
     public void UpdateCursorPosition(Vector2 _pos)
     {
-        if (cursorImage == null) return; Debug.LogError("no cursor");
         cursorImage.transform.position = _pos;
     }
 

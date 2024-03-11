@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class ToolCursor
 {
     private SpriteRenderer cursorImage;
-
+    
     public ToolCursor(SpriteRenderer _render)
     {
         cursorImage = _render;
@@ -12,6 +12,8 @@ public class ToolCursor
     
     public void UpdateCursorPosition(Vector2 _pos)
     {
+        _pos.x += .3f;
+        _pos.y -= .3f;
         cursorImage.transform.position = _pos;
     }
 

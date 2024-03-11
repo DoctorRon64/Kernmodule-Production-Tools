@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
         {
             toolButtons.Add(new ToolButton(buttons[i], i + 1));
         }
+
+        Cursor.visible = false;
         
         uiManager.InitializeToolButtons(toolButtons, SetCurrentSelectedTool);
         //add saveables
@@ -58,7 +60,7 @@ public class GameManager : MonoBehaviour
     
     private void SetCurrentSelectedTool(int _toolIndex)
     {
-        cursor.ChangeCursorImage(cursorIcons[_toolIndex]);
+        cursor.ChangeCursorImage(cursorIcons[_toolIndex - 1]);
         toolManager?.SetCurrentSelectedTool(_toolIndex);
     }
 }

@@ -1,8 +1,14 @@
 ﻿using UnityEngine;
 
-public class ToolManager
+public class ToolManager : ISaveable
 {
     private int currentSelectedTool = 0;
+    private GameManager gameManager; 
+        
+    public ToolManager(GameManager _gameManager)
+    {
+        this.gameManager = _gameManager;
+    }
     
     public void SetCurrentSelectedTool(int _toolType)
     {
@@ -13,5 +19,15 @@ public class ToolManager
     public int GetSelectedTool()
     {
         return currentSelectedTool;
+    }
+
+    public void Load()
+    {
+        this.currentSelectedTool = gameManager.saveFile.CurrentSelectedTool;
+    }
+
+    public void Save()
+    {
+        gameManager.saveFile.CurrentSelectedTool = this.currentSelectedTool;
     }
 }

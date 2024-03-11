@@ -8,7 +8,7 @@ public class SaveManager
     private readonly bool overwrite = false;
     private readonly List<ISaveable> savebles = new List<ISaveable>();
 
-    private SaveManager(string _fileName)
+    public SaveManager()
     {
         //SaveTool(fileName);
         //LoadTool();
@@ -25,7 +25,7 @@ public class SaveManager
         return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath, fileName + ".json");
     }
     
-    private void SaveTool(string saveFileName)
+    public void SaveTool(string saveFileName)
     {
         string _fullpath = GetPath();
         
@@ -54,7 +54,7 @@ public class SaveManager
         Debug.Log("Game saved to: " + _fullpath);
     }
 
-    private void LoadTool()
+    public void LoadTool()
     {
         string _fullpath = GetPath();
         

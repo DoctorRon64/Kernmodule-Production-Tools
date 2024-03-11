@@ -47,11 +47,11 @@ public class NoteManager : ISaveable
 
     public void Load()
     {
-        this.noteDatabase = gameManager.saveFile.noteDatabase;
+        this.noteDatabase = gameManager.saveFile.NoteDatabase;
     }
 
     public void Save()
     {
-        gameManager.saveFile.noteDatabase = this.noteDatabase;
+        gameManager.saveFile.NoteDatabase = this.noteDatabase;
     }
 }

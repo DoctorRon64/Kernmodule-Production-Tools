@@ -23,7 +23,6 @@ public class ToolButton
 
     public void AddListener(Action<int> _onClickCallback)
     {
-        if (button == null) return;
         onClickToolButton += _onClickCallback;
     }
     

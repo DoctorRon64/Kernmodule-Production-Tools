@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SaveManager
 {
-    private readonly string fileName = "SaveFile";
+    private readonly string defaultFileName = "SaveFile";
     private bool overwrite = true;
     private readonly List<ISaveable> saveables;
     private SaveFile saveFile;
@@ -25,14 +25,14 @@ public class SaveManager
         overwrite = !overwrite;
     }
 
-    private string GetPath()
+    private string GetPath(string _fileName)
     {
-        return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath, fileName + ".json");
+        return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath, _fileName + ".json");
     }
 
     public void SaveTool(string _saveFileName)
     {
-        string fullpath = GetPath();
+        string fullpath = GetPath(_saveFileName);
         
         // If file exists and overwrite give warning
         if (File.Exists(fullpath) && overwrite)
@@ -54,16 +54,16 @@ public class SaveManager
         Debug.Log("Game saved to: " + fullpath);
     }
 
-    public void LoadTool()
+    public void LoadTool(string _saveFileName)
     {
-        string fullpath = GetPath();
+        string fullpath = GetPath(_saveFileName);
         
         if (!File.Exists(fullpath))
         {
             Debug.LogWarning("Save file not found.");
             return;
         }
-
+        
         StreamReader reader = new StreamReader(fullpath);
         string jsonData = reader.ReadToEnd();
         reader.Close();

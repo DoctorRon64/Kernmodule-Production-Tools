@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 [Serializable]
@@ -71,11 +70,13 @@ public class NoteManager : ISaveable
     public void Load()
     {
         ClearAllNotes();
-        
+    
+        Debug.Log("Number of notes in save file: " + saveFile.noteDatabase.Count);
+
         foreach (var note in saveFile.noteDatabase)
         {
             noteDatabase.Add(note.Pos, note);
-            Debug.Log(note);
+            Debug.Log("visualize on load");
             noteVisualizer.VisualizeNotePlacement(note);
         }
     }

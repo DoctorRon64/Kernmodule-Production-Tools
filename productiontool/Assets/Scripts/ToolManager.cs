@@ -14,9 +14,4 @@ public class ToolManager
     {
         return currentSelectedTool;
     }
-    
-    
-    
-    
-    
 }

@@ -806,6 +806,7 @@ MonoBehaviour:
   - {fileID: 662285159}
   - {fileID: 1227031915}
   overwriteIndicator: {fileID: 1819208512}
+  saveFileInputField: {fileID: 517268913}
   cursorImageRenderer: {fileID: 1202738024}
   cursorIcons:
   - {fileID: 21300000, guid: b582b042ee09dc34fb245e58e0493619, type: 3}

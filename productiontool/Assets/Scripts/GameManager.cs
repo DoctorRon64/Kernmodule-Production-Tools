@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviour
         saveManager.AddSaveable(timeLine);
         saveManager.AddSaveable(noteManager);
     }
+
     private void InitializeManagers()
     {
         Instance = this;
@@ -51,6 +52,7 @@ public class GameManager : MonoBehaviour
         timeLine = new Timeline(saveFile);
         cursor = new ToolCursor(cursorImageRenderer);
     }
+
     private void InitializeCustomButtons()
     {
         uiManager.InitializeToolButtons(legacyButtonsTools, SetCurrentSelectedTool);
@@ -101,16 +103,26 @@ public class GameManager : MonoBehaviour
 
     private void SaveOrLoad(int _saveIndex)
     {
-        string fileName = saveFileInputField.text;
-        if (saveFileInputField.text == "") { fileName = "save"; }
-        
         switch (_saveIndex)
         {
-            case 0: saveManager.SaveTool(fileName); break;
-            case 1: saveManager.LoadTool(); break;
+            case 0: 
+                saveManager.SaveTool(GetFileName()); 
+                Debug.Log(saveFileInputField + GetFileName());
+                break;
+            case 1: 
+                saveManager.LoadTool(GetFileName()); 
+                Debug.Log(saveFileInputField + GetFileName());
+                break;
             case 2: uiManager.ToggleOverwriteIndicator(); saveManager.ToggleOverWrite(); break;
             case 3: noteManager.ClearAllNotes(); break;
             default: Debug.LogWarning("Unknown save index: " + _saveIndex); break;
         }
+    }
+
+    private string GetFileName()
+    {
+        string fileName = saveFileInputField.text;
+        if (saveFileInputField.text == "") { fileName = "save"; }
+        return fileName;
     }
 }

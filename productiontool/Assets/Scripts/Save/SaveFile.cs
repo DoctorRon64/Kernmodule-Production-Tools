@@ -10,5 +10,5 @@ public class SaveFile
     public bool repeatTimeline = false;
     
     //notes
-    public List<Note> noteDatabase;
+    public List<Note> noteDatabase = new List<Note>();
 }

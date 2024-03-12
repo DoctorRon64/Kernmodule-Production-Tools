@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 [Serializable]
 public class Note
@@ -15,24 +16,28 @@ public class NoteManager : ISaveable
 {
     private readonly Dictionary<Vector2Int, Note> noteDatabase = new Dictionary<Vector2Int, Note>();
     private readonly SaveFile saveFile;
-    private GameObject notePrefab;
+    private readonly NoteVisualizer noteVisualizer;
+    private readonly Transform noteParent;
     
-    public NoteManager(SaveFile _saveFile, GameObject _notePrefab)
+    public NoteManager(SaveFile _saveFile, GameObject _notePrefab, Transform _noteParent)
     {
-        notePrefab = _notePrefab;
         saveFile = _saveFile;
+        noteParent = _noteParent;
+        noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
     }
     
     public void PlaceNoteAtMousePosition(Vector3 _mousePos)
     {
         Vector2Int gridPosition = new Vector2Int(Mathf.RoundToInt(_mousePos.x), Mathf.RoundToInt(_mousePos.y));
         PlaceNote(gridPosition);
+        noteVisualizer.VisualizeNotePlacement(noteDatabase[gridPosition]);
     }
 
     public void RemoveNoteAtMousePosition(Vector3 _mousePos)
     {
         Vector2Int gridPosition = new Vector2Int(Mathf.RoundToInt(_mousePos.x), Mathf.RoundToInt(_mousePos.y));
         RemoveNote(gridPosition);
+        noteVisualizer.RemoveNoteVisual(gridPosition);
     }
 
     private void PlaceNote(Vector2Int _pos)
@@ -63,13 +68,25 @@ public class NoteManager : ISaveable
         return MusicLib.SampleRateLib[0];
     }
 
-    //handleInput
     public void Load()
     {
+        ClearAllNotes();
+        
         foreach (var note in saveFile.noteDatabase)
         {
             noteDatabase.Add(note.Pos, note);
+            Debug.Log(note);
+            noteVisualizer.VisualizeNotePlacement(note);
         }
+    }
+
+    public void ClearAllNotes()
+    {
+        foreach (Transform child in noteParent)
+        {
+            Object.Destroy(child.gameObject);
+        }
+        noteDatabase.Clear();
     }
     
     public void Save()
@@ -96,4 +113,35 @@ public static class MusicLib
     {
         44100, 48000
     };
+}
+
+public class NoteVisualizer
+{
+    private readonly GameObject notePrefab;
+    private readonly Transform parentTransform;
+
+    public NoteVisualizer(GameObject _notePrefab, Transform _parentTransform)
+    {
+        notePrefab = _notePrefab;
+        parentTransform = _parentTransform;
+    }
+
+    public void VisualizeNotePlacement(Note _note)
+    {
+        var noteVisual = Object.Instantiate(notePrefab, parentTransform);
+        noteVisual.transform.position = new Vector3(_note.Pos.x, _note.Pos.y, 0f);
+    }
+
+    public void RemoveNoteVisual(Vector2Int _pos)
+    {
+        foreach (Transform child in parentTransform)
+        {
+            var childPosition = child.position;
+            if (Mathf.Approximately(childPosition.x, _pos.x) && Mathf.Approximately(childPosition.y, _pos.y))
+            {
+                Object.Destroy(child.gameObject);
+                return;
+            }
+        }
+    }
 }

@@ -5,12 +5,13 @@ using UnityEngine;
 public class SaveManager
 {
     private readonly string fileName = "SaveFile";
-    private bool overwrite = false;
-    private readonly List<ISaveable> saveables = new List<ISaveable>();
+    private bool overwrite = true;
+    private readonly List<ISaveable> saveables;
     private SaveFile saveFile;
     
     public SaveManager(SaveFile _saveFile)
     {
+        saveables = new List<ISaveable>();
         saveFile = _saveFile;
     }
     

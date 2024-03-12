@@ -13,7 +13,7 @@ public class UIManager
     public UIManager(GameObject _overwriteIndicator)
     {
         OverwriteIndicator = _overwriteIndicator;
-        OverwriteIndicator.SetActive(false);
+        OverwriteIndicator.SetActive(true);
     }
 
     public void ToggleOverwriteIndicator()

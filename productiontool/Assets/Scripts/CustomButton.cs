@@ -4,12 +4,12 @@ using UnityEngine.UI;
 public class CustomButton
 {
     private readonly Button button;
-    private readonly int toolIndex;
+    private readonly int indexButton;
     private Action<int> onClickToolButton;
 
-    public CustomButton(Button _button, int _toolIndex)
+    public CustomButton(Button _button, int _indexButton)
     {
-        this.toolIndex = _toolIndex;
+        this.indexButton = _indexButton;
         this.button = _button;
         this.onClickToolButton = null;
         button.onClick.AddListener(OnClick);
@@ -28,6 +28,6 @@ public class CustomButton
     
     private void OnClick()
     {
-        onClickToolButton?.Invoke(toolIndex);
+        onClickToolButton?.Invoke(indexButton);
     }
 }

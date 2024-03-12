@@ -7,7 +7,6 @@ public class Timeline : ISaveable
     private int currentTimePos;
     private int timelineMaxLength = 10;
     private bool repeatTimeline;
-
     private readonly Timer timer;
     private readonly SaveFile saveFile;
     private bool isPaused = false;
@@ -23,14 +22,14 @@ public class Timeline : ISaveable
     public void Load()
     {
         currentTimePos = saveFile.currentTimePos;
-        timelineMaxLength = saveFile.TimelineLength;
+        timelineMaxLength = saveFile.timelineLength;
         repeatTimeline = saveFile.repeatTimeline;
     }
 
     public void Save()
     {
         saveFile.currentTimePos = currentTimePos;
-        saveFile.TimelineLength = timelineMaxLength;
+        saveFile.timelineLength = timelineMaxLength;
         saveFile.repeatTimeline = repeatTimeline;
     }
 

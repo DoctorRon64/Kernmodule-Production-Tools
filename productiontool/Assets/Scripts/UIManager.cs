@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager
@@ -7,9 +8,17 @@ public class UIManager
     private readonly List<CustomButton> toolButtons = new List<CustomButton>();
     private readonly List<CustomButton> timelineButtons = new List<CustomButton>();
     private readonly List<CustomButton> savingButtons = new List<CustomButton>();
+    private GameObject OverwriteIndicator;
     
-    public UIManager()
+    public UIManager(GameObject _overwriteIndicator)
     {
+        OverwriteIndicator = _overwriteIndicator;
+        OverwriteIndicator.SetActive(false);
+    }
+
+    public void ToggleOverwriteIndicator()
+    {
+        OverwriteIndicator.SetActive(!OverwriteIndicator.activeSelf);
     }
 
     public void InitializeToolButtons(List<Button> _buttons, Action<int> _onClickCallback)

@@ -5,12 +5,23 @@ using UnityEngine;
 public class SaveManager
 {
     private readonly string fileName = "SaveFile";
-    private readonly bool overwrite = false;
+    private bool overwrite = false;
     private readonly List<ISaveable> saveables = new List<ISaveable>();
-
+    private SaveFile saveFile;
+    
+    public SaveManager(SaveFile _saveFile)
+    {
+        saveFile = _saveFile;
+    }
+    
     public void AddSaveable(ISaveable _saveable)
     {
         saveables.Add(_saveable);
+    }
+
+    public void ToggleOverWrite()
+    {
+        overwrite = !overwrite;
     }
 
     private string GetPath()
@@ -22,11 +33,10 @@ public class SaveManager
     {
         string fullpath = GetPath();
         
-        // If file exists and overwrite is false, do not save
-        if (File.Exists(fullpath) && !overwrite)
+        // If file exists and overwrite give warning
+        if (File.Exists(fullpath) && overwrite)
         {
             Debug.LogWarning("Save file already exists. Set overwrite to true to overwrite the existing file.");
-            return;
         }
         
         foreach (ISaveable saveable in saveables)
@@ -34,9 +44,8 @@ public class SaveManager
             saveable.Save();
         }
 
-        string jsonData = JsonUtility.ToJson(GameManager.Instance.saveFile, true);
-
-        StreamWriter writer = new StreamWriter(fullpath, overwrite);
+        string jsonData = JsonUtility.ToJson(saveFile, true);
+        StreamWriter writer = new StreamWriter(fullpath, !overwrite);
         writer.WriteLine(jsonData);
         writer.Close();
         writer.Dispose();
@@ -59,7 +68,7 @@ public class SaveManager
         reader.Close();
         reader.Dispose();
 
-        GameManager.Instance.saveFile = JsonUtility.FromJson<SaveFile>(jsonData);
+        saveFile = JsonUtility.FromJson<SaveFile>(jsonData);
 
         foreach (ISaveable _saveable in saveables)
         {

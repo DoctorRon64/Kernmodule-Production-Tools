@@ -6,9 +6,9 @@ public class SaveFile
 {
     //Timeline
     public int currentTimePos = 0;
-    public int TimelineLength = 64;
+    public int timelineLength = 64;
     public bool repeatTimeline = false;
     
     //notes
-    public List<Note> NoteDatabase = new List<Note>();
+    public List<Note> noteDatabase;
 }

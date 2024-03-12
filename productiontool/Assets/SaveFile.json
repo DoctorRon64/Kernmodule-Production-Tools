@@ -1,6 +1,183 @@
 {
-    "currentTimePos": 0,
-    "TimelineLength": 10,
+    "currentTimePos": 3,
+    "timelineLength": 10,
     "repeatTimeline": false,
-    "NoteDatabase": []
+    "noteDatabase": [
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -1,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 3,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 4,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 329.6300048828125,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 4,
+                "y": 4
+            }
+        },
+        {
+            "Frequency": 329.6300048828125,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 1,
+                "y": 4
+            }
+        },
+        {
+            "Frequency": 329.6300048828125,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -1,
+                "y": 4
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 2,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 6,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 293.6600036621094,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 7,
+                "y": 2
+            }
+        },
+        {
+            "Frequency": 311.1300048828125,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 7,
+                "y": 3
+            }
+        },
+        {
+            "Frequency": 311.1300048828125,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 3,
+                "y": 3
+            }
+        },
+        {
+            "Frequency": 311.1300048828125,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 2,
+                "y": 3
+            }
+        },
+        {
+            "Frequency": 293.6600036621094,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 0,
+                "y": 2
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -3,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -6,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 293.6600036621094,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -7,
+                "y": 2
+            }
+        },
+        {
+            "Frequency": 311.1300048828125,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -7,
+                "y": 3
+            }
+        },
+        {
+            "Frequency": 293.6600036621094,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -8,
+                "y": 2
+            }
+        },
+        {
+            "Frequency": 277.17999267578127,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -8,
+                "y": 1
+            }
+        },
+        {
+            "Frequency": 293.6600036621094,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": 3,
+                "y": 2
+            }
+        },
+        {
+            "Frequency": 293.6600036621094,
+            "SampleRate": 44100,
+            "Pos": {
+                "x": -5,
+                "y": 2
+            }
+        }
+    ]
 }

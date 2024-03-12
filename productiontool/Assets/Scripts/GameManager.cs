@@ -5,27 +5,33 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-    public SaveFile saveFile;
+    private SaveFile saveFile;
     private SaveManager saveManager;
     private ToolManager toolManager;
     private UIManager uiManager;
+    private NoteManager noteManager;
     private ToolCursor cursor;
     private Timeline timeLine;
 
     [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
     [SerializeField] private List<Button> legacyButtonsTimeline = new List<Button>();
     [SerializeField] private List<Button> legacyButtonSaving = new List<Button>();
+
     [SerializeField] private SpriteRenderer cursorImageRenderer;
-    [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>(); 
+    [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>();
+    [SerializeField] private GameObject overwriteIndicator;
     
+    [SerializeField] private GameObject notePrefab = null;
+
     private void Awake()
     {
         InitializeManagers();
         Cursor.visible = true;
         SetCurrentSelectedTool(0);
         InitializeCustomButtons();
-        
+
         saveManager.AddSaveable(timeLine);
+        saveManager.AddSaveable(noteManager);
     }
 
     private void InitializeManagers()
@@ -33,9 +39,11 @@ public class GameManager : MonoBehaviour
         Instance = this;
         saveFile = new SaveFile();
         toolManager = new ToolManager();
-        saveManager = new SaveManager();
+        uiManager = new UIManager(overwriteIndicator);
+        
+        saveManager = new SaveManager(saveFile);
+        noteManager = new NoteManager(saveFile, notePrefab);
         timeLine = new Timeline(saveFile);
-        uiManager = new UIManager();
         cursor = new ToolCursor(cursorImageRenderer);
     }
 
@@ -50,6 +58,16 @@ public class GameManager : MonoBehaviour
     {
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         cursor.UpdateCursorPosition(mouseWorldPosition);
+
+        if (toolManager.GetSelectedTool() == 2 && Input.GetMouseButtonDown(0))
+        {
+            noteManager.PlaceNoteAtMousePosition(mouseWorldPosition);
+        }
+        
+        if (toolManager.GetSelectedTool() == 3 && Input.GetMouseButtonDown(0))
+        {
+            noteManager.RemoveNoteAtMousePosition(mouseWorldPosition);
+        }
     }
 
     private void OnDisable()
@@ -73,7 +91,7 @@ public class GameManager : MonoBehaviour
             case 2:
                 Debug.Log("Stopping timeline...");
                 timeLine.StopTimeline();
-                break; 
+                break;
             case 3:
                 Debug.Log("Toggling repeat timeline...");
                 timeLine.ToggleRepeatTimeline();
@@ -86,13 +104,26 @@ public class GameManager : MonoBehaviour
 
     private void SaveOrLoad(int _saveIndex)
     {
-        if (_saveIndex == 0) {saveManager.SaveTool("saveFile"); }
-        if (_saveIndex == 1) {saveManager.LoadTool(); }
+        if (_saveIndex == 0)
+        {
+            saveManager.SaveTool("save");
+        }
+
+        if (_saveIndex == 1)
+        {
+            saveManager.LoadTool();
+        }
+
+        if (_saveIndex == 2)
+        {
+            uiManager.ToggleOverwriteIndicator();
+            saveManager.ToggleOverWrite();
+        }
     }
-    
+
     private void SetCurrentSelectedTool(int _toolIndex)
     {
-        Cursor.visible = _toolIndex == 0; 
+        Cursor.visible = _toolIndex == 0;
         cursor.ChangeCursorImage(cursorIcons[_toolIndex]);
         toolManager?.SetCurrentSelectedTool(_toolIndex);
     }

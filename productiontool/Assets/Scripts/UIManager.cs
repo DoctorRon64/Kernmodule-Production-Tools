@@ -6,28 +6,34 @@ public class UIManager
 {
     private readonly List<CustomButton> toolButtons = new List<CustomButton>();
     private readonly List<CustomButton> timelineButtons = new List<CustomButton>();
+    private readonly List<CustomButton> savingButtons = new List<CustomButton>();
     
     public UIManager()
     {
     }
 
-    public void InitializeToolButtons(List<Button> buttons, Action<int> onClickCallback)
+    public void InitializeToolButtons(List<Button> _buttons, Action<int> _onClickCallback)
     {
-        InitializeButtons(buttons, onClickCallback, toolButtons);
+        InitializeButtons(_buttons, _onClickCallback, toolButtons);
     }
     
-    public void InitializeTimelineButtons(List<Button> buttons, Action<int> onClickCallback)
+    public void InitializeTimelineButtons(List<Button> _buttons, Action<int> _onClickCallback)
     {
-        InitializeButtons(buttons, onClickCallback, timelineButtons);
+        InitializeButtons(_buttons, _onClickCallback, timelineButtons);
     }
 
-    private void InitializeButtons(List<Button> buttons, Action<int> onClickCallback, List<CustomButton> buttonList)
+    public void InitializeSavingButtons(List<Button> _buttons, Action<int> _onClickCallBack)
     {
-        foreach (var button in buttons)
+        InitializeButtons(_buttons, _onClickCallBack, savingButtons);
+    }
+
+    private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback, List<CustomButton> _buttonList)
+    {
+        foreach (var button in _buttons)
         {
-            var customButton = new CustomButton(button, buttonList.Count);
-            customButton.AddListener(onClickCallback);
-            buttonList.Add(customButton);
+            var customButton = new CustomButton(button, _buttonList.Count);
+            customButton.AddListener(_onClickCallback);
+            _buttonList.Add(customButton);
         }
     }
 
@@ -35,11 +41,12 @@ public class UIManager
     {
         RemoveListenersFromButtons(toolButtons);
         RemoveListenersFromButtons(timelineButtons);
+        RemoveListenersFromButtons(savingButtons);
     }
 
-    private void RemoveListenersFromButtons(List<CustomButton> buttons)
+    private void RemoveListenersFromButtons(List<CustomButton> _buttons)
     {
-        foreach (var button in buttons)
+        foreach (var button in _buttons)
         {
             button.RemoveAllListeners();
         }

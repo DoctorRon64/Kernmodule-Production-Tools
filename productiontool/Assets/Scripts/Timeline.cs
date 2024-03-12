@@ -5,7 +5,7 @@ using UnityEngine;
 public class Timeline : ISaveable
 {
     private int currentTimePos;
-    private int timelineMaxLength = 64;
+    private int timelineMaxLength = 10;
     private bool repeatTimeline;
 
     private readonly Timer timer;
@@ -74,6 +74,7 @@ public class Timeline : ISaveable
         {
             if (repeatTimeline)
             {
+                currentTimePos = 0;
                 StartTimeline();
             }
             else

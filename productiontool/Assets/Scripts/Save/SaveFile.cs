@@ -10,5 +10,5 @@ public class SaveFile
     public bool repeatTimeline = false;
     
     //notes
-    public Dictionary<string, Note> NoteDatabase = new Dictionary<string, Note>();
+    public List<Note> NoteDatabase = new List<Note>();
 }

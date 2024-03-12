@@ -11,12 +11,12 @@ public class Note
 
 public class NoteManager : ISaveable
 {
-    private Dictionary<string, Note> noteDatabase = new Dictionary<string, Note>();
-    private readonly GameManager gameManager;
-
-    public NoteManager(GameManager _gameManager)
+    private readonly Dictionary<string, Note> noteDatabase = new Dictionary<string, Note>();
+    private readonly SaveFile saveFile;
+    
+    public NoteManager(SaveFile _saveFile)
     {
-        this.gameManager = _gameManager;
+        saveFile = _saveFile;
     }
 
     public void PlaceNote(float _pitch, int _pos)
@@ -48,11 +48,20 @@ public class NoteManager : ISaveable
 
     public void Load()
     {
-        this.noteDatabase = gameManager.saveFile.NoteDatabase;
+        foreach (var note in saveFile.NoteDatabase)
+        {
+            noteDatabase.Add(note.ID, note);
+        }
     }
 
     public void Save()
     {
-        gameManager.saveFile.NoteDatabase = this.noteDatabase;
+        List<Note> newNoteList = new List<Note>();
+        foreach (var note in noteDatabase)
+        {
+            newNoteList.Add(note.Value);
+        }
+        
+        newNoteList = saveFile.NoteDatabase;
     }
 }

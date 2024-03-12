@@ -17,13 +17,8 @@ public class SaveManager
     {
         return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath, fileName + ".json");
     }
-    
-    public void SaveGame()
-    {
-        SaveTool(fileName);
-    }
 
-    private void SaveTool(string _saveFileName)
+    public void SaveTool(string _saveFileName)
     {
         string fullpath = GetPath();
         
@@ -49,7 +44,7 @@ public class SaveManager
         Debug.Log("Game saved to: " + fullpath);
     }
 
-    private void LoadTool()
+    public void LoadTool()
     {
         string fullpath = GetPath();
         

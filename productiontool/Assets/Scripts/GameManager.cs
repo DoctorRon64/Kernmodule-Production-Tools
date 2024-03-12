@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
     [SerializeField] private List<Button> legacyButtonsTimeline = new List<Button>();
+    [SerializeField] private List<Button> legacyButtonSaving = new List<Button>();
     [SerializeField] private SpriteRenderer cursorImageRenderer;
     [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>(); 
     
@@ -42,6 +43,7 @@ public class GameManager : MonoBehaviour
     {
         uiManager.InitializeToolButtons(legacyButtonsTools, SetCurrentSelectedTool);
         uiManager.InitializeTimelineButtons(legacyButtonsTimeline, SetTimeline);
+        uiManager.InitializeSavingButtons(legacyButtonSaving, SaveOrLoad);
     }
 
     private void Update()
@@ -80,6 +82,12 @@ public class GameManager : MonoBehaviour
                 Debug.LogWarning("Unknown timeline index: " + _timelineIndex);
                 break;
         }
+    }
+
+    private void SaveOrLoad(int _saveIndex)
+    {
+        if (_saveIndex == 0) {saveManager.SaveTool("saveFile"); }
+        if (_saveIndex == 1) {saveManager.LoadTool(); }
     }
     
     private void SetCurrentSelectedTool(int _toolIndex)

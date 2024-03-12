@@ -7,7 +7,6 @@ public class ToolManager
     
     public void SetCurrentSelectedTool(int _toolType)
     {
-        Debug.Log(_toolType + "is the new selected tool");
         currentSelectedTool = _toolType;
     }
 
@@ -15,4 +14,9 @@ public class ToolManager
     {
         return currentSelectedTool;
     }
+    
+    
+    
+    
+    
 }

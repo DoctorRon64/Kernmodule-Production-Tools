@@ -1,13 +1,13 @@
 ﻿using System;
 using UnityEngine.UI;
 
-public class ToolButton
+public class CustomButton
 {
     private readonly Button button;
     private readonly int toolIndex;
     private Action<int> onClickToolButton;
 
-    public ToolButton(Button _button, int _toolIndex)
+    public CustomButton(Button _button, int _toolIndex)
     {
         this.toolIndex = _toolIndex;
         this.button = _button;

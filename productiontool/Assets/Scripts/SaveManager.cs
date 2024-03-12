@@ -6,18 +6,11 @@ public class SaveManager
 {
     private readonly string fileName = "SaveFile";
     private readonly bool overwrite = false;
-    private readonly List<ISaveable> savebles = new List<ISaveable>();
+    private readonly List<ISaveable> saveables = new List<ISaveable>();
 
-    public SaveManager()
+    public void AddSaveable(ISaveable _saveable)
     {
-        //SaveTool(fileName);
-        //LoadTool();
-        //Addsaveble adds stuff to saves
-    }
-
-    public void AddSaveble(ISaveable _saveable)
-    {
-        savebles.Add(_saveable);
+        saveables.Add(_saveable);
     }
 
     private string GetPath()
@@ -25,55 +18,59 @@ public class SaveManager
         return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath, fileName + ".json");
     }
     
-    private void SaveTool(string saveFileName)
+    public void SaveGame()
     {
-        string _fullpath = GetPath();
+        SaveTool(fileName);
+    }
+
+    private void SaveTool(string _saveFileName)
+    {
+        string fullpath = GetPath();
         
-        if (File.Exists(_fullpath))
+        // If file exists and overwrite is false, do not save
+        if (File.Exists(fullpath) && !overwrite)
         {
-            //ask the player to overwrite the file?
-            if (!overwrite)
-            {
-                return;
-            }
+            Debug.LogWarning("Save file already exists. Set overwrite to true to overwrite the existing file.");
+            return;
         }
         
-        foreach (ISaveable _saveable in savebles)
+        foreach (ISaveable saveable in saveables)
         {
-            _saveable.Save();
+            saveable.Save();
         }
 
         string jsonData = JsonUtility.ToJson(GameManager.Instance.saveFile, true);
 
-        StreamWriter writer = new StreamWriter(_fullpath, overwrite);
+        StreamWriter writer = new StreamWriter(fullpath, overwrite);
         writer.WriteLine(jsonData);
         writer.Close();
         writer.Dispose();
         
-        
-        Debug.Log("Game saved to: " + _fullpath);
+        Debug.Log("Game saved to: " + fullpath);
     }
 
     private void LoadTool()
     {
-        string _fullpath = GetPath();
+        string fullpath = GetPath();
         
-        if (!File.Exists(_fullpath))
+        if (!File.Exists(fullpath))
         {
-            Debug.LogError("Could not find file");
+            Debug.LogWarning("Save file not found.");
             return;
         }
 
-        foreach (ISaveable _saveable in savebles)
+        StreamReader reader = new StreamReader(fullpath);
+        string jsonData = reader.ReadToEnd();
+        reader.Close();
+        reader.Dispose();
+
+        GameManager.Instance.saveFile = JsonUtility.FromJson<SaveFile>(jsonData);
+
+        foreach (ISaveable _saveable in saveables)
         {
             _saveable.Load();
         }
         
-        StreamReader reader = new StreamReader(_fullpath);
-        GameManager.Instance.saveFile = JsonUtility.FromJson<SaveFile>(reader.ReadToEnd());
-        reader.Close();
-        reader.Dispose();
-
-        Debug.Log("Game loaded from: " + _fullpath);
+        Debug.Log("Game loaded from: " + fullpath);
     }
 }

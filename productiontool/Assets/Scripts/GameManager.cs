@@ -4,37 +4,27 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    [field: Header("Managers")]
     public static GameManager Instance { get; private set; }
     public SaveFile saveFile;
     private SaveManager saveManager;
     private ToolManager toolManager;
     private UIManager uiManager;
     private ToolCursor cursor;
+    private Timeline timeLine;
 
-    [Header("ToolButtons")] [SerializeField]
-    private List<Button> buttons = new List<Button>();
-    private readonly List<ToolButton> toolButtons = new List<ToolButton>();
-
-    [Header("CursorIcons")] 
+    [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
+    [SerializeField] private List<Button> legacyButtonsTimeline = new List<Button>();
     [SerializeField] private SpriteRenderer cursorImageRenderer;
     [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>(); 
     
     private void Awake()
     {
         InitializeManagers();
+        Cursor.visible = true;
+        SetCurrentSelectedTool(0);
+        InitializeCustomButtons();
         
-        for (var i = 0; i < buttons.Count; i++)
-        {
-            toolButtons.Add(new ToolButton(buttons[i], i + 1));
-        }
-
-        Cursor.visible = false;
-        
-        uiManager.InitializeToolButtons(toolButtons, SetCurrentSelectedTool);
-        //add saveables
-        //saveManager.AddSaveble(toolManager);
-        
+        saveManager.AddSaveable(timeLine);
     }
 
     private void InitializeManagers()
@@ -43,8 +33,15 @@ public class GameManager : MonoBehaviour
         saveFile = new SaveFile();
         toolManager = new ToolManager();
         saveManager = new SaveManager();
-        uiManager = new UIManager(Instance);
+        timeLine = new Timeline(saveFile);
+        uiManager = new UIManager();
         cursor = new ToolCursor(cursorImageRenderer);
+    }
+
+    private void InitializeCustomButtons()
+    {
+        uiManager.InitializeToolButtons(legacyButtonsTools, SetCurrentSelectedTool);
+        uiManager.InitializeTimelineButtons(legacyButtonsTimeline, SetTimeline);
     }
 
     private void Update()
@@ -56,11 +53,39 @@ public class GameManager : MonoBehaviour
     private void OnDisable()
     {
         uiManager?.RemoveListeners();
+        timeLine?.RemoveListener();
+    }
+
+    private void SetTimeline(int _timelineIndex)
+    {
+        switch (_timelineIndex)
+        {
+            case 0:
+                Debug.Log("Play timeline...");
+                timeLine.StartTimeline();
+                break;
+            case 1:
+                Debug.Log("Pausing timeline...");
+                timeLine.PauseTimeline();
+                break;
+            case 2:
+                Debug.Log("Stopping timeline...");
+                timeLine.StopTimeline();
+                break; 
+            case 3:
+                Debug.Log("Toggling repeat timeline...");
+                timeLine.ToggleRepeatTimeline();
+                break;
+            default:
+                Debug.LogWarning("Unknown timeline index: " + _timelineIndex);
+                break;
+        }
     }
     
     private void SetCurrentSelectedTool(int _toolIndex)
     {
-        cursor.ChangeCursorImage(cursorIcons[_toolIndex - 1]);
+        Cursor.visible = _toolIndex == 0; 
+        cursor.ChangeCursorImage(cursorIcons[_toolIndex]);
         toolManager?.SetCurrentSelectedTool(_toolIndex);
     }
 }

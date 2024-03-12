@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+[Serializable]
 public class Note
 {
     public string ID;
@@ -17,7 +18,7 @@ public class NoteManager : ISaveable
     {
         this.gameManager = _gameManager;
     }
-    
+
     public void PlaceNote(float _pitch, int _pos)
     {
         string hashId = GenerateId();

@@ -1,30 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class UIManager
 {
-    private readonly GameManager gameManager;
-    private readonly List<ToolButton> toolButtons = new List<ToolButton>();
+    private readonly List<CustomButton> toolButtons = new List<CustomButton>();
+    private readonly List<CustomButton> timelineButtons = new List<CustomButton>();
     
-    public UIManager(GameManager _gameManager)
+    public UIManager()
     {
-        this.gameManager = _gameManager;
     }
 
-    public void InitializeToolButtons(List<ToolButton> _toolbuttons, Action<int> _onClickCallback)
+    public void InitializeToolButtons(List<Button> buttons, Action<int> onClickCallback)
     {
-        foreach (var toolButton in _toolbuttons)
-        {
-            toolButton.AddListener(_onClickCallback);
-            toolButtons.Add(toolButton);
-        }
+        InitializeButtons(buttons, onClickCallback, toolButtons);
     }
     
+    public void InitializeTimelineButtons(List<Button> buttons, Action<int> onClickCallback)
+    {
+        InitializeButtons(buttons, onClickCallback, timelineButtons);
+    }
+
+    private void InitializeButtons(List<Button> buttons, Action<int> onClickCallback, List<CustomButton> buttonList)
+    {
+        foreach (var button in buttons)
+        {
+            var customButton = new CustomButton(button, buttonList.Count);
+            customButton.AddListener(onClickCallback);
+            buttonList.Add(customButton);
+        }
+    }
+
     public void RemoveListeners()
     {
-        foreach (var toolButton in toolButtons)
+        RemoveListenersFromButtons(toolButtons);
+        RemoveListenersFromButtons(timelineButtons);
+    }
+
+    private void RemoveListenersFromButtons(List<CustomButton> buttons)
+    {
+        foreach (var button in buttons)
         {
-            toolButton.RemoveAllListeners();
+            button.RemoveAllListeners();
         }
     }
 }

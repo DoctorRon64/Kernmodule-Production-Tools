@@ -1,19 +1,21 @@
 using UnityEngine;
-using UnityEngine.UI;
 
-public class ToolCursor
+public class CustomCursor
 {
     private SpriteRenderer cursorImage;
     
-    public ToolCursor(SpriteRenderer _render)
+    public CustomCursor(SpriteRenderer _render)
     {
         cursorImage = _render;
     }
     
     public void UpdateCursorPosition(Vector2 _pos)
     {
+        //offset
+        /*
         _pos.x += .3f;
         _pos.y += .3f;
+        */
         cursorImage.transform.position = _pos;
     }
 

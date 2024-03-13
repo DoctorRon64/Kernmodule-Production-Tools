@@ -14,37 +14,57 @@ public class Note
 public class NoteManager : ISaveable
 {
     private readonly Dictionary<Vector2Int, Note> noteDatabase = new Dictionary<Vector2Int, Note>();
-    private readonly SaveFile saveFile;
     private readonly NoteVisualizer noteVisualizer;
     private readonly Transform noteParent;
+    private readonly GameManager gameManager;
+
+    private static readonly Vector2Int minBound = new Vector2Int(-18, 0);
+    private static readonly Vector2Int maxBound = new Vector2Int(10, -12);
     
-    public NoteManager(SaveFile _saveFile, GameObject _notePrefab, Transform _noteParent)
+    public NoteManager(GameManager _gameManager, GameObject _notePrefab, Transform _noteParent)
     {
-        saveFile = _saveFile;
+        gameManager = _gameManager;
         noteParent = _noteParent;
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
     }
     
     public void PlaceNoteAtMousePosition(Vector3 _mousePos)
     {
+        _mousePos.x = Mathf.Clamp(_mousePos.x, minBound.x, maxBound.x);
+        _mousePos.y = Mathf.Clamp(_mousePos.y, maxBound.y, minBound.y);
+
         Vector2Int gridPosition = new Vector2Int(Mathf.RoundToInt(_mousePos.x), Mathf.RoundToInt(_mousePos.y));
+
+        if (gridPosition.x < minBound.x || gridPosition.x > maxBound.x || 
+            gridPosition.y > minBound.y || gridPosition.y < maxBound.y)
+            return;
+
+        if (noteDatabase.ContainsKey(gridPosition)) return;
         PlaceNote(gridPosition);
         noteVisualizer.VisualizeNotePlacement(noteDatabase[gridPosition]);
     }
 
     public void RemoveNoteAtMousePosition(Vector3 _mousePos)
     {
+        _mousePos.x = Mathf.Clamp(_mousePos.x, minBound.x, maxBound.x);
+        _mousePos.y = Mathf.Clamp(_mousePos.y, maxBound.y, minBound.y);
+
         Vector2Int gridPosition = new Vector2Int(Mathf.RoundToInt(_mousePos.x), Mathf.RoundToInt(_mousePos.y));
+
+        if (gridPosition.x < minBound.x || gridPosition.x > maxBound.x ||
+            gridPosition.y > minBound.y || gridPosition.y < maxBound.y)
+            return;
+
         RemoveNote(gridPosition);
         noteVisualizer.RemoveNoteVisual(gridPosition);
     }
 
     private void PlaceNote(Vector2Int _pos)
     {
-        if (noteDatabase.ContainsKey(_pos)) return;
-        var newNote = new Note()
+        if (!CheckFrequencyWithYPos(-_pos.y)) return;
+        Note newNote = new Note()
         {
-            Frequency = GetFrequencyWithYPos(_pos.y),
+            Frequency = GetFrequencyWithYPos(-_pos.y),
             SampleRate = GetSampleRate(),
             Pos = _pos,
         };
@@ -55,6 +75,12 @@ public class NoteManager : ISaveable
     {
         if (!noteDatabase.ContainsKey(_pos)) return;
         noteDatabase.Remove(_pos);
+    }
+
+    private bool CheckFrequencyWithYPos(int _ypos)
+    {
+        if (_ypos < 0 || _ypos >= MusicLib.FrequenciesLib.Length) return false;
+        return MusicLib.FrequenciesLib[_ypos] != 0;
     }
 
     private float GetFrequencyWithYPos(int _Ypos)
@@ -71,12 +97,11 @@ public class NoteManager : ISaveable
     {
         ClearAllNotes();
     
-        Debug.Log("Number of notes in save file: " + saveFile.noteDatabase.Count);
+        Debug.Log("Number of notes in save file: " + gameManager.SaveFile.noteDatabase.Count);
 
-        foreach (var note in saveFile.noteDatabase)
+        foreach (var note in gameManager.SaveFile.noteDatabase)
         {
             noteDatabase.Add(note.Pos, note);
-            Debug.Log("visualize on load");
             noteVisualizer.VisualizeNotePlacement(note);
         }
     }
@@ -97,7 +122,7 @@ public class NoteManager : ISaveable
         {
             newNoteList.Add(note.Value);
         }
-        saveFile.noteDatabase = newNoteList;
+        gameManager.SaveFile.noteDatabase = newNoteList;
     }
 }
 

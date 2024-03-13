@@ -8,12 +8,12 @@ public class Timeline : ISaveable
     private int timelineMaxLength = 10;
     private bool repeatTimeline;
     private readonly Timer timer;
-    private readonly SaveFile saveFile;
     private bool isPaused = false;
-
-    public Timeline(SaveFile _saveFile)
+    private readonly GameManager gameManager;
+    
+    public Timeline(GameManager _gameManager)
     {
-        saveFile = _saveFile ?? throw new ArgumentNullException(nameof(_saveFile));
+        gameManager = _gameManager;
         currentTimePos = 0;
         timer = new Timer(1000); //<---- 1000ms = 1s
         timer.Elapsed += TimerElapsed;
@@ -21,16 +21,16 @@ public class Timeline : ISaveable
 
     public void Load()
     {
-        currentTimePos = saveFile.currentTimePos;
-        timelineMaxLength = saveFile.timelineLength;
-        repeatTimeline = saveFile.repeatTimeline;
+        currentTimePos = gameManager.SaveFile.currentTimePos;
+        timelineMaxLength = gameManager.SaveFile.timelineLength;
+        repeatTimeline = gameManager.SaveFile.repeatTimeline;
     }
 
     public void Save()
     {
-        saveFile.currentTimePos = currentTimePos;
-        saveFile.timelineLength = timelineMaxLength;
-        saveFile.repeatTimeline = repeatTimeline;
+        gameManager.SaveFile.currentTimePos = currentTimePos;
+        gameManager.SaveFile.timelineLength = timelineMaxLength;
+        gameManager.SaveFile.repeatTimeline = repeatTimeline;
     }
 
     public void StartTimeline()

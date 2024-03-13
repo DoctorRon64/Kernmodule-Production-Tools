@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class SaveManager
 {
-    private readonly string defaultFileName = "SaveFile";
+    private readonly string defaultFileName = "save";
     private bool overwrite = true;
     private readonly List<ISaveable> saveables;
-    private SaveFile saveFile;
+    private GameManager gameManager;
     
-    public SaveManager(SaveFile _saveFile)
+    public SaveManager(GameManager _gameManager)
     {
         saveables = new List<ISaveable>();
-        saveFile = _saveFile;
+        gameManager = _gameManager;
     }
     
     public void AddSaveable(ISaveable _saveable)
@@ -32,6 +32,7 @@ public class SaveManager
 
     public void SaveTool(string _saveFileName)
     {
+        _saveFileName = GetFileName(_saveFileName);
         string fullpath = GetPath(_saveFileName);
         
         // If file exists and overwrite give warning
@@ -45,7 +46,7 @@ public class SaveManager
             saveable.Save();
         }
 
-        string jsonData = JsonUtility.ToJson(saveFile, true);
+        string jsonData = JsonUtility.ToJson(gameManager.SaveFile, true);
         StreamWriter writer = new StreamWriter(fullpath, !overwrite);
         writer.WriteLine(jsonData);
         writer.Close();
@@ -56,6 +57,7 @@ public class SaveManager
 
     public void LoadTool(string _saveFileName)
     {
+        _saveFileName = GetFileName(_saveFileName);
         string fullpath = GetPath(_saveFileName);
         
         if (!File.Exists(fullpath))
@@ -69,13 +71,21 @@ public class SaveManager
         reader.Close();
         reader.Dispose();
 
-        saveFile = JsonUtility.FromJson<SaveFile>(jsonData);
+        gameManager.SaveFile = JsonUtility.FromJson<SaveFile>(jsonData);
 
+        Debug.Log(gameManager.SaveFile);
+        
         foreach (ISaveable _saveable in saveables)
         {
             _saveable.Load();
         }
         
         Debug.Log("Game loaded from: " + fullpath);
+    }
+    
+    private string GetFileName(string _fileName)
+    {
+        if (_fileName == "") { _fileName = defaultFileName; }
+        return _fileName;
     }
 }

@@ -5,13 +5,13 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
-    private SaveFile saveFile;
+    private static GameManager Instance { get; set; }
+    public SaveFile SaveFile;
     private SaveManager saveManager;
     private ToolManager toolManager;
     private UIManager uiManager;
     private NoteManager noteManager;
-    private ToolCursor cursor;
+    private CustomCursor cursor;
     private Timeline timeLine;
 
     [Header("Buttons")]
@@ -32,7 +32,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         InitializeManagers();
-        Cursor.visible = true;
         SetCurrentSelectedTool(0);
         InitializeCustomButtons();
 
@@ -43,14 +42,14 @@ public class GameManager : MonoBehaviour
     private void InitializeManagers()
     {
         Instance = this;
-        saveFile = new SaveFile();
+        SaveFile = new SaveFile();
         toolManager = new ToolManager();
         
         uiManager = new UIManager(overwriteIndicator);
-        saveManager = new SaveManager(saveFile);
-        noteManager = new NoteManager(saveFile, notePrefab, allNotesParents);
-        timeLine = new Timeline(saveFile);
-        cursor = new ToolCursor(cursorImageRenderer);
+        saveManager = new SaveManager(Instance);
+        noteManager = new NoteManager(Instance, notePrefab, allNotesParents);
+        timeLine = new Timeline(Instance);
+        cursor = new CustomCursor(cursorImageRenderer);
     }
 
     private void InitializeCustomButtons()
@@ -64,15 +63,15 @@ public class GameManager : MonoBehaviour
     {
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         cursor.UpdateCursorPosition(mouseWorldPosition);
-        
-        if (toolManager.GetSelectedTool() == 2 && Input.GetMouseButtonDown(0))
+
+        if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
         {
-            noteManager.PlaceNoteAtMousePosition(mouseWorldPosition);
+            noteManager?.PlaceNoteAtMousePosition(mouseWorldPosition);
         }
         
-        if (toolManager.GetSelectedTool() == 3 && Input.GetMouseButtonDown(0))
+        if (toolManager?.GetSelectedTool() == 3 && Input.GetMouseButton(0))
         {
-            noteManager.RemoveNoteAtMousePosition(mouseWorldPosition);
+            noteManager?.RemoveNoteAtMousePosition(mouseWorldPosition);
         }
     }
 
@@ -106,23 +105,18 @@ public class GameManager : MonoBehaviour
         switch (_saveIndex)
         {
             case 0: 
-                saveManager.SaveTool(GetFileName()); 
-                Debug.Log(saveFileInputField + GetFileName());
+                saveManager.SaveTool(saveFileInputField.text); 
                 break;
             case 1: 
-                saveManager.LoadTool(GetFileName()); 
-                Debug.Log(saveFileInputField + GetFileName());
+                saveManager.LoadTool(saveFileInputField.text); 
                 break;
-            case 2: uiManager.ToggleOverwriteIndicator(); saveManager.ToggleOverWrite(); break;
-            case 3: noteManager.ClearAllNotes(); break;
+            case 2: uiManager.ToggleOverwriteIndicator(); 
+                saveManager.ToggleOverWrite(); 
+                break;
+            case 3: noteManager.ClearAllNotes();
+                saveFileInputField.text = "";
+                break;
             default: Debug.LogWarning("Unknown save index: " + _saveIndex); break;
         }
-    }
-
-    private string GetFileName()
-    {
-        string fileName = saveFileInputField.text;
-        if (saveFileInputField.text == "") { fileName = "save"; }
-        return fileName;
     }
 }

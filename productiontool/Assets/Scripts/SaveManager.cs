@@ -9,6 +9,9 @@ public class SaveManager
     private readonly List<ISaveable> saveables;
     private GameManager gameManager;
     
+    public delegate void OverwriteConfirmationEvent(string fileName);
+    public event OverwriteConfirmationEvent OnOverwriteConfirmation;
+    
     public SaveManager(GameManager _gameManager)
     {
         saveables = new List<ISaveable>();
@@ -31,15 +34,31 @@ public class SaveManager
         return Path.Combine(Application.dataPath + "/Saves/", _fileName + ".json");
     }
 
+    public void OverwriteSaveFile(string _fileName)
+    {
+        foreach (ISaveable saveable in saveables)
+        {
+            saveable.Save();
+        }
+        
+        string jsonData = JsonUtility.ToJson(gameManager.SaveFile, true);
+        StreamWriter writer = new StreamWriter(_fileName, !overwrite);
+        writer.WriteLine(jsonData);
+        writer.Close();
+        writer.Dispose();
+        
+        Debug.Log("Game Overwritten to: " + _fileName);
+    }
+    
     public void SaveTool(string _saveFileName)
     {
         _saveFileName = GetFileName(_saveFileName);
         string fullpath = GetPath(_saveFileName);
         
-        // If file exists and overwrite give warning
         if (File.Exists(fullpath) && overwrite)
         {
-            Debug.LogWarning("Save file already exists. Set overwrite to true to overwrite the existing file.");
+            OnOverwriteConfirmation?.Invoke(fullpath);
+            return;
         }
         
         foreach (ISaveable saveable in saveables)

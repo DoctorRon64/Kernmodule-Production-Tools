@@ -87,12 +87,12 @@ public class GameManager : MonoBehaviour
 
         if (isStopWhatPlayerIsDoing) return;
         
-        if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
+        if (toolManager?.GetSelectedTool() == 1 && Input.GetMouseButton(0))
         {
             noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, true);
         }
         
-        if (toolManager?.GetSelectedTool() == 3 && Input.GetMouseButton(0))
+        if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
         {
             noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, false);
         }

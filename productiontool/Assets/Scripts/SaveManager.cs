@@ -27,7 +27,8 @@ public class SaveManager
 
     private string GetPath(string _fileName)
     {
-        return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath, _fileName + ".json");
+        //return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath + "/Saves/", _fileName + ".json");
+        return Path.Combine(Application.dataPath + "/Saves/", _fileName + ".json");
     }
 
     public void SaveTool(string _saveFileName)

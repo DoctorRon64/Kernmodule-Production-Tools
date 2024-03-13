@@ -66,12 +66,12 @@ public class GameManager : MonoBehaviour
 
         if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
         {
-            noteManager?.PlaceNoteAtMousePosition(mouseWorldPosition);
+            noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, true);
         }
         
         if (toolManager?.GetSelectedTool() == 3 && Input.GetMouseButton(0))
         {
-            noteManager?.RemoveNoteAtMousePosition(mouseWorldPosition);
+            noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, false);
         }
     }
 

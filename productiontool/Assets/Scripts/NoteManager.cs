@@ -28,23 +28,7 @@ public class NoteManager : ISaveable
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
     }
     
-    public void PlaceNoteAtMousePosition(Vector3 _mousePos)
-    {
-        _mousePos.x = Mathf.Clamp(_mousePos.x, minBound.x, maxBound.x);
-        _mousePos.y = Mathf.Clamp(_mousePos.y, maxBound.y, minBound.y);
-
-        Vector2Int gridPosition = new Vector2Int(Mathf.RoundToInt(_mousePos.x), Mathf.RoundToInt(_mousePos.y));
-
-        if (gridPosition.x < minBound.x || gridPosition.x > maxBound.x || 
-            gridPosition.y > minBound.y || gridPosition.y < maxBound.y)
-            return;
-
-        if (noteDatabase.ContainsKey(gridPosition)) return;
-        PlaceNote(gridPosition);
-        noteVisualizer.VisualizeNotePlacement(noteDatabase[gridPosition]);
-    }
-
-    public void RemoveNoteAtMousePosition(Vector3 _mousePos)
+    public void PlaceOrRemoveNoteAtMousePosition(Vector3 _mousePos, bool placeNote)
     {
         _mousePos.x = Mathf.Clamp(_mousePos.x, minBound.x, maxBound.x);
         _mousePos.y = Mathf.Clamp(_mousePos.y, maxBound.y, minBound.y);
@@ -55,8 +39,16 @@ public class NoteManager : ISaveable
             gridPosition.y > minBound.y || gridPosition.y < maxBound.y)
             return;
 
-        RemoveNote(gridPosition);
-        noteVisualizer.RemoveNoteVisual(gridPosition);
+        if (placeNote)
+        {
+            if (noteDatabase.ContainsKey(gridPosition)) return;
+            PlaceNote(gridPosition);
+        }
+        else
+        {
+            if (!noteDatabase.ContainsKey(gridPosition)) return;
+            RemoveNote(gridPosition);
+        }
     }
 
     private void PlaceNote(Vector2Int _pos)
@@ -69,12 +61,13 @@ public class NoteManager : ISaveable
             Pos = _pos,
         };
         noteDatabase.Add(_pos, newNote);
+        noteVisualizer.VisualizeNotePlacement(noteDatabase[_pos]);
     }
 
     private void RemoveNote(Vector2Int _pos)
     {
-        if (!noteDatabase.ContainsKey(_pos)) return;
         noteDatabase.Remove(_pos);
+        noteVisualizer.RemoveNoteVisual(_pos);
     }
 
     private bool CheckFrequencyWithYPos(int _ypos)
@@ -162,12 +155,12 @@ public class NoteVisualizer
     {
         foreach (Transform child in parentTransform)
         {
+            if (child == null) continue;
             var childPosition = child.position;
-            if (Mathf.Approximately(childPosition.x, _pos.x) && Mathf.Approximately(childPosition.y, _pos.y))
-            {
-                Object.Destroy(child.gameObject);
-                return;
-            }
+            if (!Mathf.Approximately(childPosition.x, _pos.x) ||
+                !Mathf.Approximately(childPosition.y, _pos.y)) continue;
+            Object.Destroy(child.gameObject);
+            return;
         }
     }
 }

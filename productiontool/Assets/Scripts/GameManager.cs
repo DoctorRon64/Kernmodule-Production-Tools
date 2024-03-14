@@ -29,20 +29,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject loopTimelineIndicator;
     
     [Header("Popup")]
-    [SerializeField] private Button confirmButton;
-    [SerializeField] private Button declineButton;
     [SerializeField] private GameObject popUp;
     
     [Header("Cursors")]
     [SerializeField] private SpriteRenderer cursorImageRenderer;
     [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>();
+
+    [Header("Timeline")] 
+    [SerializeField] private Slider timeLineSlider;
     
     [Header("notes")]
     [SerializeField] private GameObject notePrefab = null;
     [SerializeField] private Transform allNotesParents = null;
-    
-    [Header("Timeline")] 
-    public Slider timelineSlider;
 
     [Header("Audio")] 
     [SerializeField] private AudioSource audioSource;
@@ -52,9 +50,9 @@ public class GameManager : MonoBehaviour
         InitializeManagers();
         SetCurrentSelectedTool(0);
         InitializeCustomButtons();
-        
-        timeLine.OnTimeLineElapsed += uiManager.UpdateTimelineSlider;
-        timeLine.OnTimeLineElapsed += noteManager.PlayNotesAtPosition;
+
+        timeLine.TimeLineElapsed += noteManager.PlayNotesAtPosition;
+        timeLine.TimeLineElapsed += uiManager.UpdateTimelineSlider;
         
         if (saveManager == null) return;
         saveManager.OnOverwriteConfirmation += HandleOverwriteConfirmation;
@@ -65,7 +63,8 @@ public class GameManager : MonoBehaviour
     private void OnDisable()
     {
         if (saveManager != null) saveManager.OnOverwriteConfirmation -= HandleOverwriteConfirmation;
-        timeLine.OnTimeLineElapsed -= uiManager.UpdateTimelineSlider;
+        timeLine.TimeLineElapsed -= uiManager.UpdateTimelineSlider;
+        timeLine.TimeLineElapsed -= noteManager.PlayNotesAtPosition;
         timeLine?.RemoveListener();
         uiManager?.RemoveListeners();
     }
@@ -77,12 +76,12 @@ public class GameManager : MonoBehaviour
         
         toolManager = new ToolManager();
         audioManager = new AudioManager(audioSource);
-        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator);
+        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator ,timeLineSlider);
         saveManager = new SaveManager(Instance);
         noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
         timeLine = new Timeline(Instance);
         cursor = new CustomCursor(cursorImageRenderer);
-        overwriteConfirmationPopup = new CustomPopup(popUp, confirmButton, declineButton, Instance);
+        overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }
     private void InitializeCustomButtons()
     {
@@ -159,15 +158,19 @@ public class GameManager : MonoBehaviour
     
     private void HandleOverwriteConfirmation(string _fileName)
     {
+        saveFileInputField.interactable = false;
+        SetCurrentSelectedTool(0);
         TogglePlayerStopDoing();
         overwriteConfirmationPopup.ShowConfirmationPopup(
             () =>
             {
                 TogglePlayerStopDoing();
+                saveFileInputField.interactable = true;
                 saveManager.OverwriteSaveFile(_fileName);
             },
             () =>
             {
+                saveFileInputField.interactable = true;
                 TogglePlayerStopDoing();
             }
         );

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,11 +13,14 @@ public class CustomPopup
     private Action continueAction;
     private Action stopAction;
     
-    public CustomPopup(GameObject _object, Button _confirm, Button _stop, GameManager _gameManager)
+    public CustomPopup(GameObject _object, GameManager _gameManager)
     {
         this.popupPanel = _object;
-        this.continueButton = _confirm;
-        this.stopButton = _stop;
+        
+        List<Button> newButtonList = new List<Button>(popupPanel.GetComponentsInChildren<Button>());
+        continueButton = newButtonList[0];
+        stopButton = newButtonList[1];
+        
         this.gameManager = _gameManager;
         
         continueButton.onClick.AddListener(OnContinueClicked);

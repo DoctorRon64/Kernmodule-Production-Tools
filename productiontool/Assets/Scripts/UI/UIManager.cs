@@ -11,9 +11,11 @@ public class UIManager
     private readonly GameObject overwriteIndicator;
     private readonly GameObject loopIndicator;
     private GameManager gameManager;
-    
-    public UIManager(GameManager _gameManger,GameObject _overwriteIndicator, GameObject _loopIndicator)
+    private Slider timeLineSlider;
+
+    public UIManager(GameManager _gameManger,GameObject _overwriteIndicator, GameObject _loopIndicator, Slider _timeLineSlider)
     {
+        timeLineSlider = _timeLineSlider;
         gameManager = _gameManger;
         loopIndicator = _loopIndicator;
         overwriteIndicator = _overwriteIndicator;
@@ -47,8 +49,10 @@ public class UIManager
     
     public void UpdateTimelineSlider(int _newTime)
     {
-        Debug.Log("update slider" + _newTime);
-        gameManager.timelineSlider.value += 1;
+        Debug.Log("update Timer to value: " + _newTime);
+        timeLineSlider.value = _newTime - 1;
+        Canvas.ForceUpdateCanvases();
+        UnityEngine.UI.CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(timeLineSlider);
     }
 
     private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback, List<CustomButton> _buttonList)

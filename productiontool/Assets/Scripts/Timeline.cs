@@ -11,7 +11,7 @@ public class Timeline : ISaveable
     
     private readonly Timer timer;
     private readonly GameManager gameManager;
-    public Action<int> OnTimeLineElapsed;
+    public Action<int> TimeLineElapsed;
     
     public Timeline(GameManager _gameManager)
     {
@@ -64,20 +64,21 @@ public class Timeline : ISaveable
 
     private void TimerElapsed(object _sender, ElapsedEventArgs _event)
     {
-        currentTimePos++;
-        OnTimeLineElapsed?.Invoke(currentTimePos);
+        if (currentTimePos >= timelineMaxLength)
+        {
+            if (repeatTimeline)
+            {
+                currentTimePos = 0;
+                StartTimeline();
+            }
+            else
+            {
+                StopTimeline();
+            }
+        }
         
-        if (currentTimePos < timelineMaxLength) return;
-        if (repeatTimeline)
-        {
-            currentTimePos = 0;
-            StartTimeline();
-        }
-        else
-        {
-            StopTimeline();
-        }
-        //mischien event raisen
+        currentTimePos++;
+        TimeLineElapsed?.Invoke(currentTimePos);
     }
 
     public void RemoveListener()

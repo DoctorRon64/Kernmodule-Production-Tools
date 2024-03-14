@@ -30,18 +30,21 @@ public class NoteManager : ISaveable
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
     }
     
-    public void PlaceOrRemoveNoteAtMousePosition(Vector3 _mousePos, bool placeNote)
+    public void PlaceOrRemoveNoteAtMousePosition(Vector3 _mousePos, bool _placeNote)
     {
-        _mousePos.x = Mathf.Clamp(_mousePos.x, minBound.x, maxBound.x);
-        _mousePos.y = Mathf.Clamp(_mousePos.y, maxBound.y, minBound.y);
-
         Vector2Int gridPosition = new Vector2Int(Mathf.RoundToInt(_mousePos.x), Mathf.RoundToInt(_mousePos.y));
-
+        
+        if (IfMousePosOutBounds(gridPosition)) return;
+        
+        /*_mousePos.x = Mathf.Clamp(_mousePos.x, minBound.x, maxBound.x);
+        _mousePos.y = Mathf.Clamp(_mousePos.y, maxBound.y, minBound.y);
+        */
+        
         if (gridPosition.x < minBound.x || gridPosition.x > maxBound.x ||
             gridPosition.y > minBound.y || gridPosition.y < maxBound.y)
             return;
 
-        if (placeNote)
+        if (_placeNote)
         {
             if (noteDatabase.ContainsKey(gridPosition)) return;
             PlaceNote(gridPosition);
@@ -53,6 +56,12 @@ public class NoteManager : ISaveable
         }
     }
 
+    private bool IfMousePosOutBounds(Vector2Int _pos){
+        if (_pos.x < minBound.x || _pos.x >= maxBound.x) return false;
+        if (_pos.y < minBound.y || _pos.y >= maxBound.y) return false;
+        return true;
+    }
+    
     private void PlaceNote(Vector2Int _pos)
     {
         if (!CheckFrequencyWithYPos(-_pos.y)) return;
@@ -110,12 +119,12 @@ public class NoteManager : ISaveable
 
     public void PlayNotesAtPosition(int _timelinePosition)
     {
+        Debug.Log("called playnote on time" + _timelinePosition);
         foreach (var note in noteDatabase.Values)
         {
-            if (note.Pos.x == _timelinePosition)
-            {
-                audioManager.PlayCLip(note);
-            }
+            if (note.Pos.x != _timelinePosition) continue;
+            Debug.Log("Trying to play sound on note " + note + "on time: " + _timelinePosition);
+            audioManager.PlayCLip(note);
         }
     }
     

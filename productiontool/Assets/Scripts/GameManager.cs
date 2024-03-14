@@ -50,22 +50,16 @@ public class GameManager : MonoBehaviour
         InitializeManagers();
         SetCurrentSelectedTool(0);
         InitializeCustomButtons();
-
-        timeLine.TimeLineElapsed += noteManager.PlayNotesAtPosition;
-        timeLine.TimeLineElapsed += uiManager.UpdateTimelineSlider;
         
-        if (saveManager == null) return;
-        saveManager.OnOverwriteConfirmation += HandleOverwriteConfirmation;
         saveManager.AddSaveable(timeLine);
         saveManager.AddSaveable(noteManager);
     }
 
     private void OnDisable()
     {
-        if (saveManager != null) saveManager.OnOverwriteConfirmation -= HandleOverwriteConfirmation;
-        timeLine.TimeLineElapsed -= uiManager.UpdateTimelineSlider;
-        timeLine.TimeLineElapsed -= noteManager.PlayNotesAtPosition;
+        //want anders word valentijn boos
         timeLine?.RemoveListener();
+        noteManager?.RemoveListeners();
         uiManager?.RemoveListeners();
     }
     
@@ -76,10 +70,10 @@ public class GameManager : MonoBehaviour
         
         toolManager = new ToolManager();
         audioManager = new AudioManager(audioSource);
-        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator ,timeLineSlider);
-        saveManager = new SaveManager(Instance);
-        noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
         timeLine = new Timeline(Instance);
+        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator, timeLine ,timeLineSlider);
+        saveManager = new SaveManager(Instance);
+        noteManager = new NoteManager(Instance, audioManager, timeLine, notePrefab, allNotesParents);
         cursor = new CustomCursor(cursorImageRenderer);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }
@@ -156,7 +150,7 @@ public class GameManager : MonoBehaviour
         isStopWhatPlayerIsDoing = !isStopWhatPlayerIsDoing;
     }
     
-    private void HandleOverwriteConfirmation(string _fileName)
+    public void HandleOverwriteConfirmation(string _fileName)
     {
         saveFileInputField.interactable = false;
         SetCurrentSelectedTool(0);

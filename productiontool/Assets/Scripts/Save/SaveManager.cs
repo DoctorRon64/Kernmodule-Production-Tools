@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -7,10 +8,7 @@ public class SaveManager
     private readonly string defaultFileName = "save";
     private bool overwrite = true;
     private readonly List<ISaveable> saveables;
-    private GameManager gameManager;
-    
-    public delegate void OverwriteConfirmationEvent(string fileName);
-    public event OverwriteConfirmationEvent OnOverwriteConfirmation;
+    private readonly GameManager gameManager;
     
     public SaveManager(GameManager _gameManager)
     {
@@ -57,7 +55,7 @@ public class SaveManager
         
         if (File.Exists(fullpath) && overwrite)
         {
-            OnOverwriteConfirmation?.Invoke(fullpath);
+            gameManager.HandleOverwriteConfirmation(fullpath);
             return;
         }
         

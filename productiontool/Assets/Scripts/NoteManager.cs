@@ -18,15 +18,19 @@ public class NoteManager : ISaveable
     private readonly Transform noteParent;
     private readonly GameManager gameManager;
     private readonly AudioManager audioManager;
+    private readonly Timeline timeline;
     
     private static readonly Vector2Int minBound = new Vector2Int(-18, 0);
     private static readonly Vector2Int maxBound = new Vector2Int(10, -12);
     
-    public NoteManager(GameManager _gameManager, AudioManager _audioManager, GameObject _notePrefab, Transform _noteParent)
+    public NoteManager(GameManager _gameManager, AudioManager _audioManager, Timeline _timeline, GameObject _notePrefab, Transform _noteParent)
     {
         this.audioManager = _audioManager;
         this.gameManager = _gameManager;
         this.noteParent = _noteParent;
+        timeline = _timeline;
+        
+        timeline.OnTimeLineElapsed += PlayNotesAtPosition;
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
     }
     
@@ -117,7 +121,7 @@ public class NoteManager : ISaveable
         noteDatabase.Clear();
     }
 
-    public void PlayNotesAtPosition(int _timelinePosition)
+    private void PlayNotesAtPosition(int _timelinePosition)
     {
         Debug.Log("called playnote on time" + _timelinePosition);
         foreach (var note in noteDatabase.Values)
@@ -136,6 +140,11 @@ public class NoteManager : ISaveable
             newNoteList.Add(note.Value);
         }
         gameManager.SaveFile.noteDatabase = newNoteList;
+    }
+
+    public void RemoveListeners()
+    {
+        timeline.OnTimeLineElapsed -= PlayNotesAtPosition;
     }
 }
 //========================MUSIC LIBRARY======================================

@@ -11,7 +11,7 @@ public class Timeline : ISaveable
     
     private readonly Timer timer;
     private readonly GameManager gameManager;
-    public Action<int> TimeLineElapsed;
+    public Action<int> OnTimeLineElapsed;
     
     public Timeline(GameManager _gameManager)
     {
@@ -39,7 +39,7 @@ public class Timeline : ISaveable
     {
         if (timer.Enabled) return;
         if (!isPaused)
-            currentTimePos = 0; // Reset only if not paused
+            currentTimePos = 0;
         timer.Start();
         isPaused = false;
     }
@@ -78,7 +78,7 @@ public class Timeline : ISaveable
         }
         
         currentTimePos++;
-        TimeLineElapsed?.Invoke(currentTimePos);
+        OnTimeLineElapsed(currentTimePos);
     }
 
     public void RemoveListener()

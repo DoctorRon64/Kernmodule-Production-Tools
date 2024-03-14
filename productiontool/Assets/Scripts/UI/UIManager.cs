@@ -10,15 +10,20 @@ public class UIManager
     private readonly List<CustomButton> savingButtons = new List<CustomButton>();
     private readonly GameObject overwriteIndicator;
     private readonly GameObject loopIndicator;
+    private readonly Slider timeLineSlider;
+    private readonly Timeline timeline;
+   
     private GameManager gameManager;
-    private Slider timeLineSlider;
-
-    public UIManager(GameManager _gameManger,GameObject _overwriteIndicator, GameObject _loopIndicator, Slider _timeLineSlider)
+    
+    public UIManager(GameManager _gameManger,GameObject _overwriteIndicator, GameObject _loopIndicator, Timeline _timeline, Slider _timeLineSlider)
     {
-        timeLineSlider = _timeLineSlider;
+        this.timeline = _timeline;
+        this.timeLineSlider = _timeLineSlider;
         gameManager = _gameManger;
         loopIndicator = _loopIndicator;
         overwriteIndicator = _overwriteIndicator;
+        
+        timeline.OnTimeLineElapsed += UpdateTimelineSlider;
         overwriteIndicator.SetActive(true);
     }
 
@@ -46,13 +51,11 @@ public class UIManager
     {
         InitializeButtons(_buttons, _onClickCallBack, savingButtons);
     }
-    
-    public void UpdateTimelineSlider(int _newTime)
+
+    private void UpdateTimelineSlider(int _newTime)
     {
         Debug.Log("update Timer to value: " + _newTime);
-        timeLineSlider.value = _newTime - 1;
-        Canvas.ForceUpdateCanvases();
-        UnityEngine.UI.CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(timeLineSlider);
+        timeLineSlider.value = _newTime;
     }
 
     private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback, List<CustomButton> _buttonList)
@@ -70,6 +73,7 @@ public class UIManager
         RemoveListenersFromButtons(toolButtons);
         RemoveListenersFromButtons(timelineButtons);
         RemoveListenersFromButtons(savingButtons);
+        timeline.OnTimeLineElapsed -= UpdateTimelineSlider;
     }
 
     private void RemoveListenersFromButtons(List<CustomButton> _buttons)

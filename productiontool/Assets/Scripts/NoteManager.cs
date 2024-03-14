@@ -28,7 +28,7 @@ public class NoteManager : ISaveable
         this.audioManager = _audioManager;
         this.gameManager = _gameManager;
         this.noteParent = _noteParent;
-        timeline = _timeline;
+        this.timeline = _timeline;
         
         timeline.OnTimeLineElapsed += PlayNotesAtPosition;
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
@@ -127,7 +127,7 @@ public class NoteManager : ISaveable
         foreach (var note in noteDatabase.Values)
         {
             if (note.Pos.x != _timelinePosition) continue;
-            Debug.Log("Trying to play sound on note " + note + "on time: " + _timelinePosition);
+            Debug.Log("call it");
             audioManager.PlayCLip(note);
         }
     }

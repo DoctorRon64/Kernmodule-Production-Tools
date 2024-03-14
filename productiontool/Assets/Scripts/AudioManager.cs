@@ -12,7 +12,6 @@ public class AudioManager
 
     public void PlayCLip(Note _note)
     {
-        Debug.Log("Trying to play audio clip");
         AudioClip clip = GenerateTone(_note.Frequency, _note.SampleRate);
         audioSource.PlayOneShot(clip);
         Debug.Log("Played sound End method");
@@ -29,15 +28,16 @@ public class AudioManager
             float time = (float)i / _sampleRate;
             samples[i] = Mathf.Sin(2 * Mathf.PI * _frequency * time);
         }
-
+        
         AudioClip clip = AudioClip.Create(generateUuid(), sampleLength, 1, _sampleRate, false);
-        clip.SetData(samples, 0);
         Debug.Log("create audio clip" + clip);
+        clip.SetData(samples, 0);
         return clip;
     }
 
     private string generateUuid()
     {
+        Debug.Log("generate uuid");
         Guid newUuid = Guid.NewGuid();
         string uuidString = newUuid.ToString();
         return uuidString;

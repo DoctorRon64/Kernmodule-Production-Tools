@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -19,6 +18,7 @@ public class GameManager : MonoBehaviour
     CustomPopup overwriteConfirmationPopup;
     
     private bool isStopWhatPlayerIsDoing = false;
+    private bool playerWantOverwritePopup = true;
     
     [Header("Buttons")]
     [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
@@ -67,16 +67,17 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         SaveFile = new SaveFile();
-        
-        toolManager = new ToolManager();
-        audioManager = new AudioManager(audioSource);
         timeLine = new Timeline(Instance);
-        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator, timeLine ,timeLineSlider);
+        
         saveManager = new SaveManager(Instance);
+        audioManager = new AudioManager(audioSource);
+        toolManager = new ToolManager();
         noteManager = new NoteManager(Instance, audioManager, timeLine, notePrefab, allNotesParents);
+        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator, timeLine ,timeLineSlider);
         cursor = new CustomCursor(cursorImageRenderer);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }
+    
     private void InitializeCustomButtons()
     {
         uiManager.InitializeToolButtons(legacyButtonsTools, SetCurrentSelectedTool);
@@ -92,14 +93,10 @@ public class GameManager : MonoBehaviour
         if (isStopWhatPlayerIsDoing) return;
         
         if (toolManager?.GetSelectedTool() == 1 && Input.GetMouseButton(0))
-        {
             noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, true);
-        }
         
         if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
-        {
             noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, false);
-        }
     }
 
     private void SetCurrentSelectedTool(int _toolIndex)
@@ -135,8 +132,9 @@ public class GameManager : MonoBehaviour
             case 1: 
                 saveManager.LoadTool(saveFileInputField.text); 
                 break;
-            case 2: uiManager.ToggleOverwriteIndicator(); 
-                saveManager.ToggleOverWrite(); 
+            case 2:
+                playerWantOverwritePopup = !playerWantOverwritePopup;
+                uiManager.ToggleOverwriteIndicator(); 
                 break;
             case 3: noteManager.ClearAllNotes();
                 saveFileInputField.text = "";
@@ -152,6 +150,8 @@ public class GameManager : MonoBehaviour
     
     public void HandleOverwriteConfirmation(string _fileName)
     {
+        if (!playerWantOverwritePopup) return;
+        
         saveFileInputField.interactable = false;
         SetCurrentSelectedTool(0);
         TogglePlayerStopDoing();

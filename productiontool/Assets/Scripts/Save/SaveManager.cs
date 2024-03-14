@@ -6,7 +6,6 @@ using UnityEngine;
 public class SaveManager
 {
     private readonly string defaultFileName = "save";
-    private bool overwrite = true;
     private readonly List<ISaveable> saveables;
     private readonly GameManager gameManager;
     
@@ -20,12 +19,7 @@ public class SaveManager
     {
         saveables.Add(_saveable);
     }
-
-    public void ToggleOverWrite()
-    {
-        overwrite = !overwrite;
-    }
-
+    
     private string GetPath(string _fileName)
     {
         //return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath + "/Saves/", _fileName + ".json");
@@ -40,7 +34,7 @@ public class SaveManager
         }
         
         string jsonData = JsonUtility.ToJson(gameManager.SaveFile, true);
-        StreamWriter writer = new StreamWriter(_fileName, !overwrite);
+        StreamWriter writer = new StreamWriter(_fileName, false);
         writer.WriteLine(jsonData);
         writer.Close();
         writer.Dispose();
@@ -53,7 +47,7 @@ public class SaveManager
         _saveFileName = GetFileName(_saveFileName);
         string fullpath = GetPath(_saveFileName);
         
-        if (File.Exists(fullpath) && overwrite)
+        if (File.Exists(fullpath))
         {
             gameManager.HandleOverwriteConfirmation(fullpath);
             return;
@@ -65,7 +59,7 @@ public class SaveManager
         }
 
         string jsonData = JsonUtility.ToJson(gameManager.SaveFile, true);
-        StreamWriter writer = new StreamWriter(fullpath, !overwrite);
+        StreamWriter writer = new StreamWriter(fullpath, false);
         writer.WriteLine(jsonData);
         writer.Close();
         writer.Dispose();

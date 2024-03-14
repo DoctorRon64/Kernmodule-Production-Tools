@@ -40,9 +40,9 @@ public class GameManager : MonoBehaviour
     [Header("notes")]
     [SerializeField] private GameObject notePrefab = null;
     [SerializeField] private Transform allNotesParents = null;
-
+    
     [Header("Timeline")] 
-    [SerializeField] private Slider progressBarTimeline;
+    public Slider timelineSlider;
 
     [Header("Audio")] 
     [SerializeField] private AudioSource audioSource;
@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
     private void OnDisable()
     {
         if (saveManager != null) saveManager.OnOverwriteConfirmation -= HandleOverwriteConfirmation;
-        if (timeLine != null) timeLine.OnTimeLineElapsed -= uiManager!.UpdateTimelineSlider;
+        timeLine.OnTimeLineElapsed -= uiManager.UpdateTimelineSlider;
         timeLine?.RemoveListener();
         uiManager?.RemoveListeners();
     }
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
         
         toolManager = new ToolManager();
         audioManager = new AudioManager(audioSource);
-        uiManager = new UIManager(overwriteIndicator, loopTimelineIndicator ,progressBarTimeline);
+        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator);
         saveManager = new SaveManager(Instance);
         noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
         timeLine = new Timeline(Instance);

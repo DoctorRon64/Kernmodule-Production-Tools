@@ -6,7 +6,7 @@ public class CustomButton
     private readonly Button button;
     private readonly int indexButton;
     private Action<int> onClickToolButton;
-
+    
     public CustomButton(Button _button, int _indexButton)
     {
         this.indexButton = _indexButton;

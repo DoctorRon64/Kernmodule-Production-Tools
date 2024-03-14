@@ -43,7 +43,7 @@ public class Timeline : ISaveable
         timer.Start();
         isPaused = false;
     }
-
+    
     public void PauseTimeline()
     {
         if (!timer.Enabled) return;
@@ -64,7 +64,6 @@ public class Timeline : ISaveable
 
     private void TimerElapsed(object _sender, ElapsedEventArgs _event)
     {
-        Debug.Log(currentTimePos);
         currentTimePos++;
         OnTimeLineElapsed?.Invoke(currentTimePos);
         

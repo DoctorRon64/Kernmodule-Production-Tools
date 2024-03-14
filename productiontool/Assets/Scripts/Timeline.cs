@@ -6,10 +6,12 @@ public class Timeline : ISaveable
 {
     private int currentTimePos;
     private int timelineMaxLength = 10;
-    private bool repeatTimeline;
-    private readonly Timer timer;
+    private bool repeatTimeline = true;
     private bool isPaused = false;
+    
+    private readonly Timer timer;
     private readonly GameManager gameManager;
+    public Action<int> OnTimeLineElapsed;
     
     public Timeline(GameManager _gameManager)
     {
@@ -35,22 +37,18 @@ public class Timeline : ISaveable
 
     public void StartTimeline()
     {
-        if (!timer.Enabled)
-        {
-            if (!isPaused)
-                currentTimePos = 0; // Reset only if not paused
-            timer.Start();
-            isPaused = false;
-        }
+        if (timer.Enabled) return;
+        if (!isPaused)
+            currentTimePos = 0; // Reset only if not paused
+        timer.Start();
+        isPaused = false;
     }
 
     public void PauseTimeline()
     {
-        if (timer.Enabled)
-        {
-            timer.Stop();
-            isPaused = true;
-        }
+        if (!timer.Enabled) return;
+        timer.Stop();
+        isPaused = true;
     }
 
     public void StopTimeline()
@@ -66,22 +64,21 @@ public class Timeline : ISaveable
 
     private void TimerElapsed(object _sender, ElapsedEventArgs _event)
     {
-        currentTimePos++;
         Debug.Log(currentTimePos);
-
-        if (currentTimePos >= timelineMaxLength)
+        currentTimePos++;
+        OnTimeLineElapsed?.Invoke(currentTimePos);
+        
+        if (currentTimePos < timelineMaxLength) return;
+        if (repeatTimeline)
         {
-            if (repeatTimeline)
-            {
-                currentTimePos = 0;
-                StartTimeline();
-            }
-            else
-            {
-                StopTimeline();
-            }
-            //mischien event raisen
+            currentTimePos = 0;
+            StartTimeline();
         }
+        else
+        {
+            StopTimeline();
+        }
+        //mischien event raisen
     }
 
     public void RemoveListener()

@@ -8,17 +8,27 @@ public class UIManager
     private readonly List<CustomButton> toolButtons = new List<CustomButton>();
     private readonly List<CustomButton> timelineButtons = new List<CustomButton>();
     private readonly List<CustomButton> savingButtons = new List<CustomButton>();
-    private GameObject OverwriteIndicator;
+    private readonly GameObject overwriteIndicator;
+    private readonly GameObject loopIndicator;
     
-    public UIManager(GameObject _overwriteIndicator)
+    private readonly Slider timelineSlider;
+    
+    public UIManager(GameObject _overwriteIndicator, GameObject _loopIndicator,Slider _timelineSlider)
     {
-        OverwriteIndicator = _overwriteIndicator;
-        OverwriteIndicator.SetActive(true);
+        this.loopIndicator = _loopIndicator;
+        this.timelineSlider = _timelineSlider;
+        this.overwriteIndicator = _overwriteIndicator;
+        this.overwriteIndicator.SetActive(true);
     }
 
     public void ToggleOverwriteIndicator()
     {
-        OverwriteIndicator.SetActive(!OverwriteIndicator.activeSelf);
+        overwriteIndicator.SetActive(!overwriteIndicator.activeSelf);
+    }
+    
+    public void ToggleLoopIndicator()
+    {
+        loopIndicator.SetActive(!loopIndicator.activeSelf);
     }
 
     public void InitializeToolButtons(List<Button> _buttons, Action<int> _onClickCallback)
@@ -34,6 +44,14 @@ public class UIManager
     public void InitializeSavingButtons(List<Button> _buttons, Action<int> _onClickCallBack)
     {
         InitializeButtons(_buttons, _onClickCallBack, savingButtons);
+    }
+    
+    public void UpdateTimelineSlider(int _newTime)
+    {
+        Debug.Log("update slider" + _newTime);
+        timelineSlider.value = _newTime - 1;
+        
+        float handlePosition = Mathf.InverseLerp(timelineSlider.minValue, timelineSlider.maxValue, _newTime);
     }
 
     private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback, List<CustomButton> _buttonList)

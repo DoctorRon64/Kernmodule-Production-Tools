@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CustomPopup
@@ -8,8 +9,8 @@ public class CustomPopup
     private readonly Button stopButton;
     private readonly GameManager gameManager;
 
-    private System.Action continueAction;
-    private System.Action stopAction;
+    private Action continueAction;
+    private Action stopAction;
     
     public CustomPopup(GameObject _object, Button _confirm, Button _stop, GameManager _gameManager)
     {
@@ -23,7 +24,7 @@ public class CustomPopup
         popupPanel.SetActive(false);
     }
 
-    public void ShowConfirmationPopup(System.Action _onContinue, System.Action _onStop)
+    public void ShowConfirmationPopup(Action _onContinue, Action _onStop)
     {
         continueAction = () =>
         {

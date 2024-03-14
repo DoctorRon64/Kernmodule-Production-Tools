@@ -17,14 +17,16 @@ public class NoteManager : ISaveable
     private readonly NoteVisualizer noteVisualizer;
     private readonly Transform noteParent;
     private readonly GameManager gameManager;
-
+    private readonly AudioManager audioManager;
+    
     private static readonly Vector2Int minBound = new Vector2Int(-18, 0);
     private static readonly Vector2Int maxBound = new Vector2Int(10, -12);
     
-    public NoteManager(GameManager _gameManager, GameObject _notePrefab, Transform _noteParent)
+    public NoteManager(GameManager _gameManager, AudioManager _audioManager, GameObject _notePrefab, Transform _noteParent)
     {
-        gameManager = _gameManager;
-        noteParent = _noteParent;
+        this.audioManager = _audioManager;
+        this.gameManager = _gameManager;
+        this.noteParent = _noteParent;
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
     }
     
@@ -90,8 +92,6 @@ public class NoteManager : ISaveable
     {
         ClearAllNotes();
     
-        Debug.Log("Number of notes in save file: " + gameManager.SaveFile.noteDatabase.Count);
-
         foreach (var note in gameManager.SaveFile.noteDatabase)
         {
             noteDatabase.Add(note.Pos, note);
@@ -107,6 +107,17 @@ public class NoteManager : ISaveable
         }
         noteDatabase.Clear();
     }
+
+    public void PlayNotesAtPosition(int _timelinePosition)
+    {
+        foreach (var note in noteDatabase.Values)
+        {
+            if (note.Pos.x == _timelinePosition)
+            {
+                audioManager.PlayCLip(note);
+            }
+        }
+    }
     
     public void Save()
     {
@@ -118,7 +129,7 @@ public class NoteManager : ISaveable
         gameManager.SaveFile.noteDatabase = newNoteList;
     }
 }
-
+//========================MUSIC LIBRARY======================================
 public static class MusicLib
 {
     public static readonly float[] FrequenciesLib = new float[]
@@ -134,6 +145,7 @@ public static class MusicLib
     };
 }
 
+//========================VISUALIZER=========================================
 public class NoteVisualizer
 {
     private readonly GameObject notePrefab;

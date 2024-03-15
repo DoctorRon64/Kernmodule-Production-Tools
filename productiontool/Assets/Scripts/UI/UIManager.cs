@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,19 +12,17 @@ public class UIManager
     private readonly GameObject overwriteIndicator;
     private readonly GameObject loopIndicator;
     private readonly Slider timeLineSlider;
-    private readonly Timeline timeline;
    
     private GameManager gameManager;
     
-    public UIManager(GameManager _gameManger,GameObject _overwriteIndicator, GameObject _loopIndicator, Timeline _timeline, Slider _timeLineSlider)
+    public UIManager(GameManager _gameManger,GameObject _overwriteIndicator, GameObject _loopIndicator, Slider _timeLineSlider)
     {
-        this.timeline = _timeline;
         this.timeLineSlider = _timeLineSlider;
         gameManager = _gameManger;
         loopIndicator = _loopIndicator;
         overwriteIndicator = _overwriteIndicator;
         
-        timeline.OnTimeLineElapsed += UpdateTimelineSlider;
+        Timeline.OnTimeLineElapsed += UpdateTimelineSlider;
         overwriteIndicator.SetActive(true);
     }
 
@@ -73,7 +72,7 @@ public class UIManager
         RemoveListenersFromButtons(toolButtons);
         RemoveListenersFromButtons(timelineButtons);
         RemoveListenersFromButtons(savingButtons);
-        timeline.OnTimeLineElapsed -= UpdateTimelineSlider;
+        Timeline.OnTimeLineElapsed -= UpdateTimelineSlider;
     }
 
     private void RemoveListenersFromButtons(List<CustomButton> _buttons)

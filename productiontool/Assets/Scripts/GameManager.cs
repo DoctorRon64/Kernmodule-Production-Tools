@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Timeline;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -72,8 +73,8 @@ public class GameManager : MonoBehaviour
         saveManager = new SaveManager(Instance);
         audioManager = new AudioManager(audioSource);
         toolManager = new ToolManager();
-        noteManager = new NoteManager(Instance, audioManager, timeLine, notePrefab, allNotesParents);
-        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator, timeLine ,timeLineSlider);
+        noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
+        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator ,timeLineSlider);
         cursor = new CustomCursor(cursorImageRenderer);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }

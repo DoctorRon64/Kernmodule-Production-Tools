@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CustomCursor
 {
-    private SpriteRenderer cursorImage;
+    private readonly SpriteRenderer cursorImage;
     
     public CustomCursor(SpriteRenderer _render)
     {
@@ -12,10 +12,9 @@ public class CustomCursor
     public void UpdateCursorPosition(Vector2 _pos)
     {
         //offset
-        /*
-        _pos.x += .3f;
-        _pos.y += .3f;
-        */
+        _pos.x += .35f;
+        _pos.y += .32f;
+    
         cursorImage.transform.position = _pos;
     }
 

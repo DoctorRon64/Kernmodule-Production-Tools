@@ -13,24 +13,24 @@ public class Note
 
 public class NoteManager : ISaveable
 {
-    private readonly Dictionary<Vector2Int, Note> noteDatabase = new Dictionary<Vector2Int, Note>();
+    private readonly Dictionary<Vector2Int, Note> noteDatabase;
     private readonly NoteVisualizer noteVisualizer;
     private readonly Transform noteParent;
     private readonly GameManager gameManager;
     private readonly AudioManager audioManager;
-    private readonly Timeline timeline;
-    
+
     private static readonly Vector2Int minBound = new Vector2Int(-18, 0);
     private static readonly Vector2Int maxBound = new Vector2Int(10, -12);
     
-    public NoteManager(GameManager _gameManager, AudioManager _audioManager, Timeline _timeline, GameObject _notePrefab, Transform _noteParent)
+    public NoteManager(GameManager _gameManager, AudioManager _audioManager , GameObject _notePrefab, Transform _noteParent)
     {
         this.audioManager = _audioManager;
         this.gameManager = _gameManager;
         this.noteParent = _noteParent;
-        this.timeline = _timeline;
         
-        timeline.OnTimeLineElapsed += PlayNotesAtPosition;
+        noteDatabase = new Dictionary<Vector2Int, Note>();
+        
+        Timeline.OnTimeLineElapsed += PlayNotesAtPosition;
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
     }
     
@@ -121,14 +121,16 @@ public class NoteManager : ISaveable
         noteDatabase.Clear();
     }
 
-    private void PlayNotesAtPosition(int _timelinePosition)
+    public void PlayNotesAtPosition(int _timelinePosition)
     {
-        Debug.Log("called playnote on time" + _timelinePosition);
         foreach (var note in noteDatabase.Values)
         {
-            if (note.Pos.x != _timelinePosition) continue;
-            Debug.Log("call it");
-            audioManager.PlayCLip(note);
+            int notePosX = note.Pos.x - minBound.x;
+            if (notePosX == _timelinePosition)
+            {
+                Debug.Log("called the note corrosponding to time frame: " + _timelinePosition + " " + notePosX);
+                audioManager.PlayClip(note);
+            }
         }
     }
     
@@ -144,7 +146,7 @@ public class NoteManager : ISaveable
 
     public void RemoveListeners()
     {
-        timeline.OnTimeLineElapsed -= PlayNotesAtPosition;
+        Timeline.OnTimeLineElapsed -= PlayNotesAtPosition;
     }
 }
 //========================MUSIC LIBRARY======================================
@@ -152,9 +154,9 @@ public static class MusicLib
 {
     public static readonly float[] FrequenciesLib = new float[]
     {
-        261.63f, 277.18f, 293.66f, 311.13f, 329.63f,
-        349.23f, 369.99f, 392f, 415.3f, 440f, 466.16f, 
-        493.88f
+        493.88f, 466.16f, 440f, 415.3f, 392f, 369.99f,
+        349.23f, 329.63f, 311.13f, 293.66f, 277.18f,
+        261.63f,
     };
 
     public static readonly int[] SampleRateLib = new int[]

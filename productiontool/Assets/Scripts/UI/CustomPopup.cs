@@ -6,8 +6,6 @@ using UnityEngine.UI;
 public class CustomPopup
 {
     private readonly GameObject popupPanel;
-    private readonly Button continueButton;
-    private readonly Button stopButton;
     private readonly GameManager gameManager;
 
     private Action continueAction;
@@ -18,8 +16,8 @@ public class CustomPopup
         this.popupPanel = _object;
         
         List<Button> newButtonList = new List<Button>(popupPanel.GetComponentsInChildren<Button>());
-        continueButton = newButtonList[0];
-        stopButton = newButtonList[1];
+        var continueButton = newButtonList[0];
+        var stopButton = newButtonList[1];
         
         this.gameManager = _gameManager;
         

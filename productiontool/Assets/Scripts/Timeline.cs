@@ -4,13 +4,12 @@ using System.Timers;
 public class Timeline : ISaveable
 {
     private int currentTimePos;
-    private int timelineMaxLength = 10;
+    private int timelineMaxLength = 29;
     private bool repeatTimeline = true;
     private bool isPaused = false;
-    
     private readonly Timer timer;
     private readonly GameManager gameManager;
-    public Action<int> OnTimeLineElapsed;
+    public static event Action<int> OnTimeLineElapsed;
     
     public Timeline(GameManager _gameManager)
     {
@@ -77,7 +76,7 @@ public class Timeline : ISaveable
         }
         
         currentTimePos++;
-        OnTimeLineElapsed(currentTimePos);
+        OnTimeLineElapsed?.Invoke(currentTimePos);
     }
 
     public void RemoveListener()

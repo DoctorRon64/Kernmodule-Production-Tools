@@ -10,36 +10,36 @@ public class AudioManager
         audioSource = _source;
     }
 
-    public void PlayCLip(Note _note)
+    public void PlayClip(Note _note)
     {
-        AudioClip clip = GenerateTone(_note.Frequency, _note.SampleRate);
-        audioSource.PlayOneShot(clip);
-        Debug.Log("Played sound End method");
-    }
+        Debug.Log("Called play clip" + _note);
+        const float noteLength = 0.3f;
 
-    private AudioClip GenerateTone(float _frequency, int _sampleRate)
-    {
-        int lengthSecs = 1; // for now
-        int sampleLength = _sampleRate * lengthSecs;
+        int sampleLength = Mathf.CeilToInt(_note.SampleRate * noteLength);
         float[] samples = new float[sampleLength];
-
         for (int i = 0; i < sampleLength; i++)
         {
-            float time = (float)i / _sampleRate;
-            samples[i] = Mathf.Sin(2 * Mathf.PI * _frequency * time);
+            float time = (float)i / _note.SampleRate;
+            samples[i] = Mathf.Sin(2 * Mathf.PI * _note.Frequency * time);
         }
-        
-        AudioClip clip = AudioClip.Create(generateUuid(), sampleLength, 1, _sampleRate, false);
-        Debug.Log("create audio clip" + clip);
-        clip.SetData(samples, 0);
-        return clip;
+        string randomClipName = GenerateUniqueClipName();
+
+        AudioClip clip = AudioClip.Create(randomClipName, sampleLength, 1, _note.SampleRate, false);
+        if (clip != null)
+        {
+            clip.SetData(samples, 0);
+            audioSource.PlayOneShot(clip);
+            UnityEngine.Object.Destroy(clip);
+        }
+        else
+        {
+            Debug.LogError("Failed to create AudioClip.");
+        }
     }
 
-    private string generateUuid()
+    private string GenerateUniqueClipName()
     {
-        Debug.Log("generate uuid");
         Guid newUuid = Guid.NewGuid();
-        string uuidString = newUuid.ToString();
-        return uuidString;
+        return newUuid.ToString();
     }
 }

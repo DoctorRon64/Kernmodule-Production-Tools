@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager
+public class UIManager : ISaveSettings, ISaveable
 {
     private readonly List<CustomButton> toolButtons = new List<CustomButton>();
     private readonly List<CustomButton> timelineButtons = new List<CustomButton>();
@@ -12,43 +13,65 @@ public class UIManager
     private readonly GameObject overwriteIndicator;
     private readonly GameObject loopIndicator;
     private readonly Slider timeLineSlider;
-   
+    private readonly TMP_InputField bpmField;
+    private readonly TMP_Dropdown dropdownSampleRate;
     private GameManager gameManager;
     
-    public UIManager(GameManager _gameManger,GameObject _overwriteIndicator, GameObject _loopIndicator, Slider _timeLineSlider)
+    public UIManager(GameManager _gameManger,
+        List<Button> _legacyButtonsTools, List<Button> _legacyButtonsTimeline, List<Button> _legacyButtonSaving,
+        List<Action<int>> _allActions, GameObject _overwriteIndicator, GameObject _loopIndicator, Slider _timeLineSlider,  TMP_InputField _bmpInputField,
+        TMP_Dropdown _sampleRate
+        )
     {
-        this.timeLineSlider = _timeLineSlider;
+        timeLineSlider = _timeLineSlider;
         gameManager = _gameManger;
         loopIndicator = _loopIndicator;
         overwriteIndicator = _overwriteIndicator;
+        bpmField = _bmpInputField;
+        dropdownSampleRate = _sampleRate;
         
-        Timeline.OnTimeLineElapsed += UpdateTimelineSlider;
+        InitializeButtons(_legacyButtonsTools, _allActions[0], toolButtons);
+        InitializeButtons(_legacyButtonsTimeline, _allActions[1], timelineButtons);
+        InitializeButtons(_legacyButtonSaving, _allActions[2], savingButtons);
+
+        EventManager.AddListener<int>(EventType.TimerElapse, UpdateTimelineSlider);
+        dropdownSampleRate.onValueChanged.AddListener(SampleRateChanged);
+        bpmField.text = 60.ToString();
+        bpmField.onValueChanged.AddListener(BpmChanged);
         overwriteIndicator.SetActive(true);
+    }
+
+    public void Load(SettingsFile _load)
+    {
+        overwriteIndicator.SetActive(_load.DoesPlayerWantOverwritePopUp);
+        loopIndicator.SetActive(_load.RepeatTimeline);
+    }
+
+    public void Save(SettingsFile _save)
+    {
+        _save.RepeatTimeline = loopIndicator.activeSelf;
+        _save.DoesPlayerWantOverwritePopUp = overwriteIndicator.activeSelf;
+    }
+
+    private void BpmChanged(string _value)
+    {
+        EventManager.InvokeEvent(EventType.Bpm, Int32.Parse(_value));
+    }
+
+    private void SampleRateChanged(int _value)
+    {
+        Debug.Log(_value);
+        EventManager.InvokeEvent(EventType.SampleRate, dropdownSampleRate.value);
     }
 
     public void ToggleOverwriteIndicator()
     {
         overwriteIndicator.SetActive(!overwriteIndicator.activeSelf);
     }
-    
+
     public void ToggleLoopIndicator()
     {
         loopIndicator.SetActive(!loopIndicator.activeSelf);
-    }
-
-    public void InitializeToolButtons(List<Button> _buttons, Action<int> _onClickCallback)
-    {
-        InitializeButtons(_buttons, _onClickCallback, toolButtons);
-    }
-    
-    public void InitializeTimelineButtons(List<Button> _buttons, Action<int> _onClickCallback)
-    {
-        InitializeButtons(_buttons, _onClickCallback, timelineButtons);
-    }
-
-    public void InitializeSavingButtons(List<Button> _buttons, Action<int> _onClickCallBack)
-    {
-        InitializeButtons(_buttons, _onClickCallBack, savingButtons);
     }
 
     private void UpdateTimelineSlider(int _newTime)
@@ -72,7 +95,8 @@ public class UIManager
         RemoveListenersFromButtons(toolButtons);
         RemoveListenersFromButtons(timelineButtons);
         RemoveListenersFromButtons(savingButtons);
-        Timeline.OnTimeLineElapsed -= UpdateTimelineSlider;
+        bpmField.onValueChanged.RemoveAllListeners();
+        dropdownSampleRate.onValueChanged.RemoveAllListeners();
     }
 
     private void RemoveListenersFromButtons(List<CustomButton> _buttons)
@@ -81,5 +105,15 @@ public class UIManager
         {
             button.RemoveAllListeners();
         }
+    }
+
+    public void Load(SaveFile _load)
+    {
+        bpmField.text = _load.BPM.ToString();
+    }
+
+    public void Save(SaveFile _save)
+    {
+        
     }
 }

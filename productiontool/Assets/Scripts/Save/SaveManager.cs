@@ -1,102 +1,143 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
 public class SaveManager
 {
-    private readonly string defaultFileName = "save";
-    private readonly List<ISaveable> saveables;
+    private readonly string defaultFileName = "saveFile";
+    private readonly List<ISaveable> saveableNotes;
+    private readonly List<ISaveSettings> saveablesSettings;
+    private SaveFile saveFile;
+
+    private readonly string settingsFileName = "settings";
+    private SettingsFile settingsFile;
     private readonly GameManager gameManager;
-    
+
     public SaveManager(GameManager _gameManager)
     {
-        saveables = new List<ISaveable>();
+        settingsFile = new SettingsFile();
+        saveableNotes = new List<ISaveable>();
+        saveablesSettings = new List<ISaveSettings>();
         gameManager = _gameManager;
     }
-    
-    public void AddSaveable(ISaveable _saveable)
-    {
-        saveables.Add(_saveable);
-    }
-    
-    private string GetPath(string _fileName)
-    {
-        return Path.Combine(Application.isEditor ? Application.dataPath : Application.persistentDataPath , _fileName + ".json");
-    }
 
-    public void OverwriteSaveFile(string _fileName)
+    //==================================Settings Saving =========================
+    public void LoadSettings()
     {
-        foreach (ISaveable saveable in saveables)
+        string settingsPath = GetFullPath(settingsFileName);
+
+        if (!File.Exists(settingsPath))
         {
-            saveable.Save();
-        }
-        
-        string jsonData = JsonUtility.ToJson(gameManager.SaveFile, true);
-        StreamWriter writer = new StreamWriter(_fileName, false);
-        writer.WriteLine(jsonData);
-        writer.Close();
-        writer.Dispose();
-        
-        Debug.Log("Game Overwritten to: " + _fileName);
-    }
-    
-    public void SaveTool(string _saveFileName)
-    {
-        _saveFileName = GetFileName(_saveFileName);
-        string fullpath = GetPath(_saveFileName);
-        
-        if (File.Exists(fullpath))
-        {
-            gameManager.HandleOverwriteConfirmation(fullpath);
+            settingsFile = new SettingsFile();
+            SaveSettings();
             return;
         }
-        
-        foreach (ISaveable saveable in saveables)
+        foreach (ISaveSettings saveable in saveablesSettings)
         {
-            saveable.Save();
+            saveable.Load(settingsFile);
         }
 
-        string jsonData = JsonUtility.ToJson(gameManager.SaveFile, true);
-        StreamWriter writer = new StreamWriter(fullpath, false);
-        writer.WriteLine(jsonData);
-        writer.Close();
-        writer.Dispose();
-        
-        Debug.Log("Game saved to: " + fullpath);
+        settingsFile = LoadJson<SettingsFile>(settingsPath);
     }
+    private void SaveSettings()
+    {
+        foreach (ISaveSettings saveable in saveablesSettings)
+        {
+            saveable.Save(settingsFile);
+        }
+        
+        string settingsPath = GetFullPath(settingsFileName);
+        SaveJson(settingsPath, settingsFile);
+    }
+    
+    //=============================== Tool Saving =============================
+    public void SaveTool(string _saveFileName, bool _isOverwrite)
+    {
+        SaveSettings();
+        saveFile = new SaveFile();
+        string fullpath = _saveFileName;
 
+        if (_isOverwrite)
+        {
+            fullpath = GetFullPath(_saveFileName);
+            if (File.Exists(fullpath))
+            {
+                gameManager.HandleOverwriteConfirmation(fullpath);
+                return;
+            }
+        }
+        
+        foreach (ISaveable saveable in saveableNotes)
+        {
+            saveable.Save(saveFile);
+        }
+
+        SaveJson(fullpath, saveFile);
+    }
     public void LoadTool(string _saveFileName)
     {
-        _saveFileName = GetFileName(_saveFileName);
-        string fullpath = GetPath(_saveFileName);
-        
+        saveFile = new SaveFile();
+        string fullpath = GetFullPath(_saveFileName);
+
         if (!File.Exists(fullpath))
         {
             Debug.LogWarning("Save file not found.");
             return;
         }
-        
-        StreamReader reader = new StreamReader(fullpath);
+
+        saveFile = LoadJson<SaveFile>(fullpath);
+
+        foreach (ISaveable _saveable in saveableNotes)
+        {
+            _saveable.Load(saveFile);
+        }
+    }
+    
+    //============================ Handy methods =============================
+    
+    private void SaveJson<T>(string _path, T _file)
+    {
+        string jsonData = JsonUtility.ToJson(_file, true);
+        StreamWriter writer = new StreamWriter(_path, false);
+        writer.WriteLine(jsonData);
+        writer.Close();
+        writer.Dispose();
+        Debug.Log("Game saved to: " + _path);
+    }
+    private T LoadJson<T>(string _path)
+    {
+        StreamReader reader = new StreamReader(_path);
         string jsonData = reader.ReadToEnd();
         reader.Close();
         reader.Dispose();
-
-        gameManager.SaveFile = JsonUtility.FromJson<SaveFile>(jsonData);
-
-        Debug.Log(gameManager.SaveFile);
         
-        foreach (ISaveable _saveable in saveables)
-        {
-            _saveable.Load();
-        }
-        
-        Debug.Log("Game loaded from: " + fullpath);
+        Debug.Log("Game loaded from: " + _path);
+        return JsonUtility.FromJson<T>(jsonData);
+    }
+
+    public SettingsFile GetSettingsFile()
+    {
+        return settingsFile;
+    }
+
+    public void AddSaveable(ISaveable _saveable)
+    {
+        saveableNotes.Add(_saveable);
+    }
+
+    public void AddSettings(ISaveSettings _settings)
+    {
+        saveablesSettings.Add(_settings);
     }
     
-    private string GetFileName(string _fileName)
+    private string GetFullPath(string fileName)
     {
-        if (_fileName == "") { _fileName = defaultFileName; }
-        return _fileName;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = defaultFileName;
+        }
+
+        string fullPath = Path.Combine(/*Application.isEditor ?  : Application.persistentDataPath */Application.dataPath, fileName + ".json");
+        return fullPath;
     }
 }

@@ -4,11 +4,7 @@ using System.Collections.Generic;
 [Serializable]
 public class SaveFile
 {
-    //Timeline
-    public int currentTimePos = 0;
-    public int timelineLength = 64;
-    public bool repeatTimeline = false;
-    
     //notes
+    public int BPM = 60;
     public List<Note> noteDatabase = new List<Note>();
 }

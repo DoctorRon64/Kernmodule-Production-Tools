@@ -1,5 +1,6 @@
 using System;
 using System.Timers;
+using UnityEngine;
 
 public class Timeline : ISaveable
 {
@@ -7,32 +8,28 @@ public class Timeline : ISaveable
     private int timelineMaxLength = 29;
     private bool repeatTimeline = true;
     private bool isPaused = false;
+    private int BPM = 60;
+    
     private readonly Timer timer;
     private readonly GameManager gameManager;
-    public static event Action<int> OnTimeLineElapsed;
     
     public Timeline(GameManager _gameManager)
     {
         gameManager = _gameManager;
         currentTimePos = 0;
-        timer = new Timer(1000); //<---- 1000ms = 1s
+        
+        int milliSeconds = 60000 / BPM;
+        timer = new Timer(milliSeconds);
         timer.Elapsed += TimerElapsed;
+        
+        EventManager.AddListener<int>(EventType.Bpm, ChangeBpm);
     }
 
-    public void Load()
+    private void ChangeBpm(int _newBpm)
     {
-        currentTimePos = gameManager.SaveFile.currentTimePos;
-        timelineMaxLength = gameManager.SaveFile.timelineLength;
-        repeatTimeline = gameManager.SaveFile.repeatTimeline;
+        BPM = _newBpm;
     }
-
-    public void Save()
-    {
-        gameManager.SaveFile.currentTimePos = currentTimePos;
-        gameManager.SaveFile.timelineLength = timelineMaxLength;
-        gameManager.SaveFile.repeatTimeline = repeatTimeline;
-    }
-
+    
     public void StartTimeline()
     {
         if (timer.Enabled) return;
@@ -76,12 +73,23 @@ public class Timeline : ISaveable
         }
         
         currentTimePos++;
-        OnTimeLineElapsed?.Invoke(currentTimePos);
+        EventManager.InvokeEvent(EventType.TimerElapse, currentTimePos);
     }
 
     public void RemoveListener()
     {
         if (timer == null) return;
         timer.Elapsed -= TimerElapsed;
+    }
+
+    public void Load(SaveFile _save)
+    {
+        BPM = _save.BPM;
+    }
+
+    public void Save(SaveFile _load)
+    {
+        Debug.Log(_load);
+        _load.BPM = BPM;
     }
 }

@@ -1,5 +1,5 @@
 ﻿public interface ISaveable
 {
-    void Load();
-    void Save();
+    void Load(SaveFile _load);
+    void Save(SaveFile _save);
 }

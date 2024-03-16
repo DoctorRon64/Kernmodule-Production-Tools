@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Timeline;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -12,95 +12,105 @@ public class GameManager : MonoBehaviour
     private UIManager uiManager;
     private NoteManager noteManager;
     private AudioManager audioManager;
-    public SaveFile SaveFile;
     
     private CustomCursor cursor;
     private Timeline timeLine;
-    CustomPopup overwriteConfirmationPopup;
-    
+    private CustomPopup overwriteConfirmationPopup;
+
     private bool isStopWhatPlayerIsDoing = false;
-    private bool playerWantOverwritePopup = true;
-    
-    [Header("Buttons")]
+
+    [Header("Buttons")] 
     [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
     [SerializeField] private List<Button> legacyButtonsTimeline = new List<Button>();
     [SerializeField] private List<Button> legacyButtonSaving = new List<Button>();
     [SerializeField] private TMP_InputField saveFileInputField;
     [SerializeField] private GameObject overwriteIndicator;
     [SerializeField] private GameObject loopTimelineIndicator;
-    
-    [Header("Popup")]
     [SerializeField] private GameObject popUp;
+    [SerializeField] private TMP_InputField bpmInputField;
+    [SerializeField] private TMP_Dropdown sampleRateDropdown;
     
-    [Header("Cursors")]
+    [Header("Cursors")] 
     [SerializeField] private SpriteRenderer cursorImageRenderer;
     [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>();
 
     [Header("Timeline")] 
     [SerializeField] private Slider timeLineSlider;
-    
-    [Header("notes")]
-    [SerializeField] private GameObject notePrefab = null;
-    [SerializeField] private Transform allNotesParents = null;
+    [SerializeField] private GameObject notePrefab;
+    [SerializeField] private Transform allNotesParents;
 
-    [Header("Audio")] 
-    [SerializeField] private AudioSource audioSource;
+    [Header("Audio")] [SerializeField] private AudioSource audioSource;
 
     private void Awake()
     {
         InitializeManagers();
         SetCurrentSelectedTool(0);
-        InitializeCustomButtons();
-        
-        saveManager.AddSaveable(timeLine);
-        saveManager.AddSaveable(noteManager);
+
+        foreach (var field in typeof(GameManager).GetFields(
+                     System.Reflection.BindingFlags.NonPublic | 
+                     System.Reflection.BindingFlags.Instance | 
+                     System.Reflection.BindingFlags.DeclaredOnly))
+        {
+            if (typeof(ISaveable).IsAssignableFrom(field.FieldType))
+            {
+                ISaveable saveable = (ISaveable)field.GetValue(this);
+                saveManager.AddSaveable(saveable);
+                Debug.Log(field);
+            }
+
+            if (typeof(ISaveSettings).IsAssignableFrom(field.FieldType))
+            {
+                ISaveSettings settings = (ISaveSettings)field.GetValue(this);
+                saveManager.AddSettings(settings);
+                Debug.Log(field);
+            }
+        }
+        saveManager.LoadSettings();
     }
 
     private void OnDisable()
     {
         //want anders word valentijn boos
         timeLine?.RemoveListener();
-        noteManager?.RemoveListeners();
         uiManager?.RemoveListeners();
+        EventManager.RemoveAllListeners();
     }
-    
+
     private void InitializeManagers()
     {
         Instance = this;
-        SaveFile = new SaveFile();
         timeLine = new Timeline(Instance);
-        
+
         saveManager = new SaveManager(Instance);
         audioManager = new AudioManager(audioSource);
         toolManager = new ToolManager();
         noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
-        uiManager = new UIManager(Instance ,overwriteIndicator, loopTimelineIndicator ,timeLineSlider);
+       
+        uiManager = new UIManager(Instance,
+            legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
+            new List<Action<int>> { SetCurrentSelectedTool, SetTimeline, SaveOrLoad },
+            overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown
+        );
+        
         cursor = new CustomCursor(cursorImageRenderer);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }
     
-    private void InitializeCustomButtons()
-    {
-        uiManager.InitializeToolButtons(legacyButtonsTools, SetCurrentSelectedTool);
-        uiManager.InitializeTimelineButtons(legacyButtonsTimeline, SetTimeline);
-        uiManager.InitializeSavingButtons(legacyButtonSaving, SaveOrLoad);
-    }
-
     private void Update()
     {
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         cursor.UpdateCursorPosition(mouseWorldPosition);
 
         if (isStopWhatPlayerIsDoing) return;
-        
+
         if (toolManager?.GetSelectedTool() == 1 && Input.GetMouseButton(0))
             noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, true);
-        
+
         if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
             noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, false);
     }
 
-    private void SetCurrentSelectedTool(int _toolIndex)
+    public void SetCurrentSelectedTool(int _toolIndex)
     {
         if (isStopWhatPlayerIsDoing) return;
         Cursor.visible = _toolIndex == 0;
@@ -114,11 +124,22 @@ public class GameManager : MonoBehaviour
         if (timeLine == null) return;
         switch (_timelineIndex)
         {
-            case 0: timeLine.StartTimeline(); break;
-            case 1: timeLine.PauseTimeline(); break;
-            case 2: timeLine.StopTimeline(); break;
-            case 3: timeLine.ToggleRepeatTimeline(); uiManager.ToggleLoopIndicator(); break;
-            default: Debug.LogWarning("Unknown timeline index: " + _timelineIndex); break;
+            case 0:
+                timeLine.StartTimeline();
+                break;
+            case 1:
+                timeLine.PauseTimeline();
+                break;
+            case 2:
+                timeLine.StopTimeline();
+                break;
+            case 3:
+                timeLine.ToggleRepeatTimeline();
+                uiManager.ToggleLoopIndicator();
+                break;
+            default:
+                Debug.LogWarning("Unknown timeline index: " + _timelineIndex);
+                break;
         }
     }
 
@@ -127,20 +148,22 @@ public class GameManager : MonoBehaviour
         if (isStopWhatPlayerIsDoing) return;
         switch (_saveIndex)
         {
-            case 0: 
-                saveManager.SaveTool(saveFileInputField.text); 
+            case 0:
+                saveManager.SaveTool(saveFileInputField.text, true);
                 break;
-            case 1: 
-                saveManager.LoadTool(saveFileInputField.text); 
+            case 1:
+                saveManager.LoadTool(saveFileInputField.text);
                 break;
             case 2:
-                playerWantOverwritePopup = !playerWantOverwritePopup;
-                uiManager.ToggleOverwriteIndicator(); 
+                uiManager.ToggleOverwriteIndicator();
                 break;
-            case 3: noteManager.ClearAllNotes();
+            case 3:
+                noteManager.ClearAllNotes();
                 saveFileInputField.text = "";
                 break;
-            default: Debug.LogWarning("Unknown save index: " + _saveIndex); break;
+            default:
+                Debug.LogWarning("Unknown save index: " + _saveIndex);
+                break;
         }
     }
 
@@ -148,11 +171,11 @@ public class GameManager : MonoBehaviour
     {
         isStopWhatPlayerIsDoing = !isStopWhatPlayerIsDoing;
     }
-    
+
     public void HandleOverwriteConfirmation(string _fileName)
     {
-        if (!playerWantOverwritePopup) return;
-        
+        if (!saveManager.GetSettingsFile().DoesPlayerWantOverwritePopUp) return;
+
         saveFileInputField.interactable = false;
         SetCurrentSelectedTool(0);
         TogglePlayerStopDoing();
@@ -161,7 +184,7 @@ public class GameManager : MonoBehaviour
             {
                 TogglePlayerStopDoing();
                 saveFileInputField.interactable = true;
-                saveManager.OverwriteSaveFile(_fileName);
+                saveManager.SaveTool(_fileName, false);
             },
             () =>
             {

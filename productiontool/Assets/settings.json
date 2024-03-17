@@ -1,5 +1,5 @@
 {
+    "SampleRate": 1,
     "DoesPlayerWantOverwritePopUp": true,
-    "SampleRate": 44100,
     "RepeatTimeline": true
 }

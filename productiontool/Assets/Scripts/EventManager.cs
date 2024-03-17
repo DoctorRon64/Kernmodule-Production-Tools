@@ -37,14 +37,10 @@ public static class EventManager
 
     public static void RemoveAllListeners()
     {
-        foreach (var kvp in eventDictionary)
-        {
-            //unsubscribe all events
-        }
-
+        eventDictionary.Clear();
         Parameterless.RemoveAllListeners();
     }
-
+    
     public static void InvokeEvent<T>(EventType _type, T _parameter)
     {
         if (eventDictionary.ContainsKey(_type) && eventDictionary[_type] != null)
@@ -74,11 +70,7 @@ public static class EventManager
 
         public static void RemoveAllListeners()
         {
-            foreach (var kvp in eventDictionary)
-            {
-                RemoveListener(kvp.Key, kvp.Value);
-                eventDictionary[kvp.Key] = null;
-            }
+            eventDictionary.Clear();
         }
 
         public static void InvokeEvent(EventType _type)

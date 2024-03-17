@@ -94,7 +94,6 @@ public class NoteManager : ISaveable, ISaveSettings
 
     private void GetSampleRate(int _value)
     {
-        Debug.Log(_value + "samplerate" +  MusicLib.SampleRateLib[_value]);
         sampleRate = MusicLib.SampleRateLib[_value];
     }
 

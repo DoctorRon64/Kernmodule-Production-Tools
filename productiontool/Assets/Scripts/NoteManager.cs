@@ -94,6 +94,7 @@ public class NoteManager : ISaveable, ISaveSettings
 
     private void GetSampleRate(int _value)
     {
+        Debug.Log(_value + "samplerate" +  MusicLib.SampleRateLib[_value]);
         sampleRate = MusicLib.SampleRateLib[_value];
     }
 
@@ -142,12 +143,21 @@ public class NoteManager : ISaveable, ISaveSettings
 
     public void Load(SettingsFile _load)
     {
-        sampleRate = _load.SampleRate;
+        sampleRate = MusicLib.SampleRateLib[_load.SampleRate];
     }
 
     public void Save(SettingsFile _save)
     {
-        _save.SampleRate = sampleRate;
+        int indexSampleRate = Array.IndexOf(MusicLib.SampleRateLib, sampleRate);
+        if (indexSampleRate != -1)
+        {
+            _save.SampleRate = indexSampleRate;
+        }
+        else
+        {
+            Debug.LogWarning("Sample rate not found in the library. Saving default sample rate index.");
+            _save.SampleRate = 0;
+        }
     }
 }
 //========================MUSIC LIBRARY======================================

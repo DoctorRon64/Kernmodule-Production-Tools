@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 public enum EventType
 {
@@ -7,7 +8,7 @@ public enum EventType
     TimerElapse,
     SampleRate,
     Repeat,
-    overwrite
+    OverwriteToggle
 }
 
 public static class EventManager
@@ -25,9 +26,12 @@ public static class EventManager
 
     public static void RemoveListener<T>(EventType _type, Action<T> _action)
     {
-        if (eventDictionary.ContainsKey(_type) && eventDictionary[_type] != null)
+        if (eventDictionary.TryGetValue(_type, out Delegate currentEvent))
         {
-            eventDictionary[_type] = (Action<T>)eventDictionary[_type] - _action;
+            if (currentEvent != null)
+            {
+                eventDictionary[_type] = (Action<T>)currentEvent - _action;
+            }
         }
     }
 
@@ -35,7 +39,7 @@ public static class EventManager
     {
         foreach (var kvp in eventDictionary)
         {
-            eventDictionary[kvp.Key] = null;
+            //unsubscribe all events
         }
 
         Parameterless.RemoveAllListeners();
@@ -72,6 +76,7 @@ public static class EventManager
         {
             foreach (var kvp in eventDictionary)
             {
+                RemoveListener(kvp.Key, kvp.Value);
                 eventDictionary[kvp.Key] = null;
             }
         }

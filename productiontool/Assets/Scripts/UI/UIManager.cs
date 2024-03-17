@@ -36,7 +36,7 @@ public class UIManager : ISaveSettings, ISaveable
 
         EventManager.AddListener<int>(EventType.TimerElapse, UpdateTimelineSlider);
         EventManager.Parameterless.AddListener(EventType.Repeat, ToggleLoopIndicator);
-        EventManager.Parameterless.AddListener(EventType.overwrite, ToggleOverwriteIndicator);
+        EventManager.Parameterless.AddListener(EventType.OverwriteToggle, ToggleOverwriteIndicator);
         
         dropdownSampleRate.onValueChanged.AddListener(SampleRateChanged);
         bpmField.onValueChanged.AddListener(BpmChanged);
@@ -47,9 +47,7 @@ public class UIManager : ISaveSettings, ISaveable
     {
         overwriteIndicator.SetActive(_load.DoesPlayerWantOverwritePopUp);
         loopIndicator.SetActive(_load.RepeatTimeline);
-
-        int indexSampleRate = Array.IndexOf(MusicLib.SampleRateLib, _load.SampleRate);
-        dropdownSampleRate.value = MusicLib.SampleRateLib[indexSampleRate];
+        dropdownSampleRate.value = _load.SampleRate;
     }
 
     public void Save(SettingsFile _save)
@@ -79,7 +77,7 @@ public class UIManager : ISaveSettings, ISaveable
     private void UpdateTimelineSlider(int _newTime)
     {
         Debug.Log("update Timer to value: " + _newTime);
-        timeLineSlider.value = _newTime;
+        timeLineSlider.value = _newTime - 1;
     }
 
     private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback, List<CustomButton> _buttonList)

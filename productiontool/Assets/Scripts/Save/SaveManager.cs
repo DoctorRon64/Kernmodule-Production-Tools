@@ -11,8 +11,9 @@ public class SaveManager : ISaveSettings
 
     private readonly string settingsFileName = "settings";
     private SettingsFile settingsFile;
+    
     private readonly GameManager gameManager;
-    public bool DoesPlayerWantOverwritePopUp = true;
+    private bool doesPlayerWantOverwritePopUp = true;
     
     public SaveManager(GameManager _gameManager)
     {
@@ -21,7 +22,7 @@ public class SaveManager : ISaveSettings
         saveablesSettings = new List<ISaveSettings>();
         gameManager = _gameManager;
         
-        EventManager.Parameterless.AddListener(EventType.overwrite, ToggleIfPlayerWantsOverwite);
+        EventManager.Parameterless.AddListener(EventType.OverwriteToggle, ToggleIfPlayerWantsOverwite);
     }
 
     //==================================Settings Saving =========================
@@ -35,12 +36,14 @@ public class SaveManager : ISaveSettings
             SaveSettings();
             return;
         }
+        
+        settingsFile = LoadJson<SettingsFile>(settingsPath);
+        
         foreach (ISaveSettings saveable in saveablesSettings)
         {
             saveable.Load(settingsFile);
         }
 
-        settingsFile = LoadJson<SettingsFile>(settingsPath);
     }
     public void SaveSettings()
     {
@@ -65,6 +68,7 @@ public class SaveManager : ISaveSettings
             fullpath = GetFullPath(_saveFileName);
             if (File.Exists(fullpath))
             {
+                if (!doesPlayerWantOverwritePopUp) return;
                 gameManager.HandleOverwriteConfirmation(fullpath);
                 return;
             }
@@ -105,7 +109,6 @@ public class SaveManager : ISaveSettings
         writer.WriteLine(jsonData);
         writer.Close();
         writer.Dispose();
-        Debug.Log("Game saved to: " + _path);
     }
     private T LoadJson<T>(string _path)
     {
@@ -114,13 +117,12 @@ public class SaveManager : ISaveSettings
         reader.Close();
         reader.Dispose();
         
-        Debug.Log("Game loaded from: " + _path);
         return JsonUtility.FromJson<T>(jsonData);
     }
 
     public void ToggleIfPlayerWantsOverwite()
     {
-        DoesPlayerWantOverwritePopUp = !DoesPlayerWantOverwritePopUp;
+        doesPlayerWantOverwritePopUp = !doesPlayerWantOverwritePopUp;
     }
 
     public void AddSaveable(ISaveable _saveable)
@@ -133,24 +135,24 @@ public class SaveManager : ISaveSettings
         saveablesSettings.Add(_settings);
     }
     
-    private string GetFullPath(string fileName)
+    private string GetFullPath(string _fileName)
     {
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(_fileName))
         {
-            fileName = defaultFileName;
+            _fileName = defaultFileName;
         }
 
-        string fullPath = Path.Combine(/*Application.isEditor ?  : Application.persistentDataPath */Application.dataPath, fileName + ".json");
+        string fullPath = Path.Combine(/*Application.isEditor ?  : Application.persistentDataPath */Application.dataPath, _fileName + ".json");
         return fullPath;
     }
 
     public void Load(SettingsFile _load)
     {
-        DoesPlayerWantOverwritePopUp = _load.DoesPlayerWantOverwritePopUp;
+        doesPlayerWantOverwritePopUp = _load.DoesPlayerWantOverwritePopUp;
     }
 
     public void Save(SettingsFile _save)
     {
-        _save.DoesPlayerWantOverwritePopUp = DoesPlayerWantOverwritePopUp;
+        _save.DoesPlayerWantOverwritePopUp = doesPlayerWantOverwritePopUp;
     }
 }

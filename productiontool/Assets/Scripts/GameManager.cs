@@ -70,6 +70,7 @@ public class GameManager : MonoBehaviour
     {
         //want anders word valentijn boos
         saveManager?.SaveSettings();
+        
         timeLine?.RemoveListener();
         uiManager?.RemoveListeners();
         EventManager.RemoveAllListeners();
@@ -80,17 +81,16 @@ public class GameManager : MonoBehaviour
         Instance = this;
         timeLine = new Timeline(Instance);
 
-        saveManager = new SaveManager(Instance);
-        audioManager = new AudioManager(audioSource);
-        toolManager = new ToolManager();
-        noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
        
         uiManager = new UIManager(Instance,
             legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
             new List<Action<int>> { SetCurrentSelectedTool, SetTimeline, SaveOrLoad },
             overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown
         );
-        
+        saveManager = new SaveManager(Instance);
+        audioManager = new AudioManager(audioSource);
+        toolManager = new ToolManager();
+        noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
         cursor = new CustomCursor(cursorImageRenderer);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }
@@ -153,7 +153,7 @@ public class GameManager : MonoBehaviour
                 saveManager.LoadTool(saveFileInputField.text);
                 break;
             case 2:
-                EventManager.Parameterless.InvokeEvent(EventType.overwrite);
+                EventManager.Parameterless.InvokeEvent(EventType.OverwriteToggle);
                 break;
             case 3:
                 noteManager.ClearAllNotes();
@@ -172,8 +172,6 @@ public class GameManager : MonoBehaviour
 
     public void HandleOverwriteConfirmation(string _fileName)
     {
-        if (!saveManager.DoesPlayerWantOverwritePopUp) return;
-
         saveFileInputField.interactable = false;
         SetCurrentSelectedTool(0);
         TogglePlayerStopDoing();

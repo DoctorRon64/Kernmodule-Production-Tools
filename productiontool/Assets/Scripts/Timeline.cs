@@ -2,7 +2,7 @@ using System;
 using System.Timers;
 using UnityEngine;
 
-public class Timeline : ISaveable
+public class Timeline : ISaveable, ISaveSettings
 {
     private int currentTimePos;
     private int timelineMaxLength = 29;
@@ -23,6 +23,7 @@ public class Timeline : ISaveable
         timer.Elapsed += TimerElapsed;
         
         EventManager.AddListener<int>(EventType.Bpm, ChangeBpm);
+        EventManager.Parameterless.AddListener(EventType.Repeat, ToggleRepeatTimeline);
     }
 
     private void ChangeBpm(int _newBpm)
@@ -52,7 +53,7 @@ public class Timeline : ISaveable
         isPaused = false;
     }
 
-    public void ToggleRepeatTimeline()
+    private void ToggleRepeatTimeline()
     {
         repeatTimeline = !repeatTimeline;
     }
@@ -91,5 +92,15 @@ public class Timeline : ISaveable
     {
         Debug.Log(_load);
         _load.BPM = BPM;
+    }
+
+    public void Load(SettingsFile _save)
+    {
+        repeatTimeline = _save.RepeatTimeline;
+    }
+
+    public void Save(SettingsFile _load)
+    {
+        _load.RepeatTimeline = repeatTimeline;
     }
 }

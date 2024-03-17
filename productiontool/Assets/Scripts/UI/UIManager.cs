@@ -35,22 +35,25 @@ public class UIManager : ISaveSettings, ISaveable
         InitializeButtons(_legacyButtonSaving, _allActions[2], savingButtons);
 
         EventManager.AddListener<int>(EventType.TimerElapse, UpdateTimelineSlider);
+        EventManager.Parameterless.AddListener(EventType.Repeat, ToggleLoopIndicator);
+        EventManager.Parameterless.AddListener(EventType.overwrite, ToggleOverwriteIndicator);
+        
         dropdownSampleRate.onValueChanged.AddListener(SampleRateChanged);
-        bpmField.text = 60.ToString();
         bpmField.onValueChanged.AddListener(BpmChanged);
-        overwriteIndicator.SetActive(true);
+        bpmField.text = 60.ToString();
     }
 
     public void Load(SettingsFile _load)
     {
         overwriteIndicator.SetActive(_load.DoesPlayerWantOverwritePopUp);
         loopIndicator.SetActive(_load.RepeatTimeline);
+
+        int indexSampleRate = Array.IndexOf(MusicLib.SampleRateLib, _load.SampleRate);
+        dropdownSampleRate.value = MusicLib.SampleRateLib[indexSampleRate];
     }
 
     public void Save(SettingsFile _save)
     {
-        _save.RepeatTimeline = loopIndicator.activeSelf;
-        _save.DoesPlayerWantOverwritePopUp = overwriteIndicator.activeSelf;
     }
 
     private void BpmChanged(string _value)
@@ -60,16 +63,15 @@ public class UIManager : ISaveSettings, ISaveable
 
     private void SampleRateChanged(int _value)
     {
-        Debug.Log(_value);
         EventManager.InvokeEvent(EventType.SampleRate, dropdownSampleRate.value);
     }
 
-    public void ToggleOverwriteIndicator()
+    private void ToggleOverwriteIndicator()
     {
         overwriteIndicator.SetActive(!overwriteIndicator.activeSelf);
     }
 
-    public void ToggleLoopIndicator()
+    private void ToggleLoopIndicator()
     {
         loopIndicator.SetActive(!loopIndicator.activeSelf);
     }

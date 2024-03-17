@@ -55,14 +55,12 @@ public class GameManager : MonoBehaviour
             {
                 ISaveable saveable = (ISaveable)field.GetValue(this);
                 saveManager.AddSaveable(saveable);
-                Debug.Log(field);
             }
 
             if (typeof(ISaveSettings).IsAssignableFrom(field.FieldType))
             {
                 ISaveSettings settings = (ISaveSettings)field.GetValue(this);
                 saveManager.AddSettings(settings);
-                Debug.Log(field);
             }
         }
         saveManager.LoadSettings();
@@ -71,6 +69,7 @@ public class GameManager : MonoBehaviour
     private void OnDisable()
     {
         //want anders word valentijn boos
+        saveManager?.SaveSettings();
         timeLine?.RemoveListener();
         uiManager?.RemoveListeners();
         EventManager.RemoveAllListeners();
@@ -134,8 +133,7 @@ public class GameManager : MonoBehaviour
                 timeLine.StopTimeline();
                 break;
             case 3:
-                timeLine.ToggleRepeatTimeline();
-                uiManager.ToggleLoopIndicator();
+                EventManager.Parameterless.InvokeEvent(EventType.Repeat);
                 break;
             default:
                 Debug.LogWarning("Unknown timeline index: " + _timelineIndex);
@@ -155,7 +153,7 @@ public class GameManager : MonoBehaviour
                 saveManager.LoadTool(saveFileInputField.text);
                 break;
             case 2:
-                uiManager.ToggleOverwriteIndicator();
+                EventManager.Parameterless.InvokeEvent(EventType.overwrite);
                 break;
             case 3:
                 noteManager.ClearAllNotes();
@@ -174,7 +172,7 @@ public class GameManager : MonoBehaviour
 
     public void HandleOverwriteConfirmation(string _fileName)
     {
-        if (!saveManager.GetSettingsFile().DoesPlayerWantOverwritePopUp) return;
+        if (!saveManager.DoesPlayerWantOverwritePopUp) return;
 
         saveFileInputField.interactable = false;
         SetCurrentSelectedTool(0);

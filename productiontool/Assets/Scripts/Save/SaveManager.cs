@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class SaveManager
+public class SaveManager : ISaveSettings
 {
     private readonly string defaultFileName = "saveFile";
     private readonly List<ISaveable> saveableNotes;
@@ -12,13 +12,16 @@ public class SaveManager
     private readonly string settingsFileName = "settings";
     private SettingsFile settingsFile;
     private readonly GameManager gameManager;
-
+    public bool DoesPlayerWantOverwritePopUp = true;
+    
     public SaveManager(GameManager _gameManager)
     {
         settingsFile = new SettingsFile();
         saveableNotes = new List<ISaveable>();
         saveablesSettings = new List<ISaveSettings>();
         gameManager = _gameManager;
+        
+        EventManager.Parameterless.AddListener(EventType.overwrite, ToggleIfPlayerWantsOverwite);
     }
 
     //==================================Settings Saving =========================
@@ -39,7 +42,7 @@ public class SaveManager
 
         settingsFile = LoadJson<SettingsFile>(settingsPath);
     }
-    private void SaveSettings()
+    public void SaveSettings()
     {
         foreach (ISaveSettings saveable in saveablesSettings)
         {
@@ -115,9 +118,9 @@ public class SaveManager
         return JsonUtility.FromJson<T>(jsonData);
     }
 
-    public SettingsFile GetSettingsFile()
+    public void ToggleIfPlayerWantsOverwite()
     {
-        return settingsFile;
+        DoesPlayerWantOverwritePopUp = !DoesPlayerWantOverwritePopUp;
     }
 
     public void AddSaveable(ISaveable _saveable)
@@ -139,5 +142,15 @@ public class SaveManager
 
         string fullPath = Path.Combine(/*Application.isEditor ?  : Application.persistentDataPath */Application.dataPath, fileName + ".json");
         return fullPath;
+    }
+
+    public void Load(SettingsFile _load)
+    {
+        DoesPlayerWantOverwritePopUp = _load.DoesPlayerWantOverwritePopUp;
+    }
+
+    public void Save(SettingsFile _save)
+    {
+        _save.DoesPlayerWantOverwritePopUp = DoesPlayerWantOverwritePopUp;
     }
 }

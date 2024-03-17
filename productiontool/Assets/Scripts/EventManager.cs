@@ -5,7 +5,9 @@ public enum EventType
 {
     Bpm,
     TimerElapse,
-    SampleRate
+    SampleRate,
+    Repeat,
+    overwrite
 }
 
 public static class EventManager
@@ -36,7 +38,7 @@ public static class EventManager
             eventDictionary[kvp.Key] = null;
         }
 
-        EventManagerParameterless.RemoveAllListeners();
+        Parameterless.RemoveAllListeners();
     }
 
     public static void InvokeEvent<T>(EventType _type, T _parameter)
@@ -47,7 +49,7 @@ public static class EventManager
         }
     }
 
-    public class EventManagerParameterless
+    public class Parameterless
     {
         private static readonly Dictionary<EventType, Action> eventDictionary = new Dictionary<EventType, Action>();
 
@@ -74,7 +76,7 @@ public static class EventManager
             }
         }
 
-        public static void InvokeEvent(EventType _type, Action _action)
+        public static void InvokeEvent(EventType _type)
         {
             eventDictionary[_type]?.Invoke();
         }

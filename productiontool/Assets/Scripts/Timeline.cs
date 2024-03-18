@@ -29,8 +29,10 @@ public class Timeline : ISaveable, ISaveSettings
     private void ChangeBpm(int _newBpm)
     {
         BPM = _newBpm;
+        int milliSeconds = 60000 / BPM;
+        timer.Interval = milliSeconds;
     }
-    
+
     public void StartTimeline()
     {
         if (timer.Enabled) return;

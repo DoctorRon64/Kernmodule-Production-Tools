@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
         uiManager = new UIManager(Instance,
             legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
             new List<Action<int>> { SetCurrentSelectedTool, SetTimeline, SaveOrLoad },
-            overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown,fullScreenToggle
+            overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown, fullScreenToggle
         );
         saveManager = new SaveManager(Instance);
         audioManager = new AudioManager(audioSource);

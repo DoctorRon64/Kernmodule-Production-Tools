@@ -64,7 +64,10 @@ public class UIManager : ISaveSettings, ISaveable
 
     private void BpmChanged(string _value)
     {
-        EventManager.InvokeEvent(EventType.Bpm, Int32.Parse(_value));
+        int integerBpm;
+        if (_value == "") integerBpm = 0;
+        integerBpm =  Int32.Parse(_value);
+        EventManager.InvokeEvent(EventType.Bpm, integerBpm);
     }
 
     private void SampleRateChanged(int _value)

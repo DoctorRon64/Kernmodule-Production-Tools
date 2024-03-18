@@ -1,5 +1,6 @@
 {
-    "SampleRate": 1,
+    "SampleRate": 0,
     "DoesPlayerWantOverwritePopUp": true,
-    "RepeatTimeline": true
+    "RepeatTimeline": true,
+    "FullscreenToggle": true
 }

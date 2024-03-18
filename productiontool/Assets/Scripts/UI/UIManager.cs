@@ -15,12 +15,14 @@ public class UIManager : ISaveSettings, ISaveable
     private readonly Slider timeLineSlider;
     private readonly TMP_InputField bpmField;
     private readonly TMP_Dropdown dropdownSampleRate;
+    private readonly Toggle fullscreenToggle;
+    private bool fullscreenOnOrOff;
     private GameManager gameManager;
     
     public UIManager(GameManager _gameManger,
         List<Button> _legacyButtonsTools, List<Button> _legacyButtonsTimeline, List<Button> _legacyButtonSaving,
         List<Action<int>> _allActions, GameObject _overwriteIndicator, GameObject _loopIndicator, Slider _timeLineSlider,  TMP_InputField _bmpInputField,
-        TMP_Dropdown _sampleRate
+        TMP_Dropdown _sampleRate, Toggle _fullScreenToggle
         )
     {
         timeLineSlider = _timeLineSlider;
@@ -29,6 +31,7 @@ public class UIManager : ISaveSettings, ISaveable
         overwriteIndicator = _overwriteIndicator;
         bpmField = _bmpInputField;
         dropdownSampleRate = _sampleRate;
+        fullscreenToggle = _fullScreenToggle;
         
         InitializeButtons(_legacyButtonsTools, _allActions[0], toolButtons);
         InitializeButtons(_legacyButtonsTimeline, _allActions[1], timelineButtons);
@@ -37,7 +40,8 @@ public class UIManager : ISaveSettings, ISaveable
         EventManager.AddListener<int>(EventType.TimerElapse, UpdateTimelineSlider);
         EventManager.Parameterless.AddListener(EventType.Repeat, ToggleLoopIndicator);
         EventManager.Parameterless.AddListener(EventType.OverwriteToggle, ToggleOverwriteIndicator);
-        
+
+        fullscreenToggle.onValueChanged.AddListener(FullscreenToggle);
         dropdownSampleRate.onValueChanged.AddListener(SampleRateChanged);
         bpmField.onValueChanged.AddListener(BpmChanged);
         bpmField.text = 60.ToString();
@@ -48,10 +52,14 @@ public class UIManager : ISaveSettings, ISaveable
         overwriteIndicator.SetActive(_load.DoesPlayerWantOverwritePopUp);
         loopIndicator.SetActive(_load.RepeatTimeline);
         dropdownSampleRate.value = _load.SampleRate;
+        fullscreenToggle.isOn = _load.FullscreenToggle;
+        
+        FullscreenToggle(_load.FullscreenToggle);
     }
 
     public void Save(SettingsFile _save)
     {
+        _save.FullscreenToggle = fullscreenOnOrOff;
     }
 
     private void BpmChanged(string _value)
@@ -62,6 +70,12 @@ public class UIManager : ISaveSettings, ISaveable
     private void SampleRateChanged(int _value)
     {
         EventManager.InvokeEvent(EventType.SampleRate, dropdownSampleRate.value);
+    }
+
+    private void FullscreenToggle(bool _toggle)
+    {
+        fullscreenOnOrOff = _toggle;
+        Screen.fullScreen = fullscreenOnOrOff;
     }
 
     private void ToggleOverwriteIndicator()

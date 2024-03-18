@@ -23,12 +23,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
     [SerializeField] private List<Button> legacyButtonsTimeline = new List<Button>();
     [SerializeField] private List<Button> legacyButtonSaving = new List<Button>();
+    
+    [Header("UI")]
     [SerializeField] private TMP_InputField saveFileInputField;
     [SerializeField] private GameObject overwriteIndicator;
     [SerializeField] private GameObject loopTimelineIndicator;
     [SerializeField] private GameObject popUp;
     [SerializeField] private TMP_InputField bpmInputField;
     [SerializeField] private TMP_Dropdown sampleRateDropdown;
+    [SerializeField] private Toggle fullScreenToggle;
     
     [Header("Cursors")] 
     [SerializeField] private SpriteRenderer cursorImageRenderer;
@@ -85,7 +88,7 @@ public class GameManager : MonoBehaviour
         uiManager = new UIManager(Instance,
             legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
             new List<Action<int>> { SetCurrentSelectedTool, SetTimeline, SaveOrLoad },
-            overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown
+            overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown,fullScreenToggle
         );
         saveManager = new SaveManager(Instance);
         audioManager = new AudioManager(audioSource);

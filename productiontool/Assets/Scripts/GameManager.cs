@@ -92,10 +92,10 @@ public class GameManager : MonoBehaviour
             new List<Action<int>> { SetCurrentSelectedTool, SetTimeline, SaveOrLoad },
             overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown, fullScreenToggle
         );
-        saveManager = new SaveManager(Instance);
         audioManager = new AudioManager(audioSource);
-        toolManager = new ToolManager();
         noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
+        saveManager = new SaveManager(Instance, noteManager);
+        toolManager = new ToolManager();
         cursor = new CustomCursor(cursorImageRenderer);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }
@@ -173,6 +173,9 @@ public class GameManager : MonoBehaviour
             case 3:
                 noteManager.ClearAllNotes();
                 saveFileInputField.text = "";
+                break;
+            case 4:
+                saveManager.ExportToFile();
                 break;
             default:
                 Debug.LogWarning("Unknown save index: " + _saveIndex);

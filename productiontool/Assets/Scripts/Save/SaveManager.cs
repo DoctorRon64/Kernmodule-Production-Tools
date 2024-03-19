@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using SFB;
 
 public class SaveManager : ISaveSettings
 {
@@ -14,19 +15,28 @@ public class SaveManager : ISaveSettings
     private SettingsFile settingsFile;
     
     private readonly GameManager gameManager;
+    private readonly NoteManager noteManager;
     private bool doesPlayerWantOverwritePopUp = true;
     
-    public SaveManager(GameManager _gameManager)
+    public SaveManager(GameManager _gameManager, NoteManager _noteManager)
     {
         settingsFile = new SettingsFile();
         saveableNotes = new List<ISaveable>();
         saveablesSettings = new List<ISaveSettings>();
         gameManager = _gameManager;
+        noteManager = _noteManager;
         
         EventManager.Parameterless.AddListener(EventType.OverwriteToggle, ToggleIfPlayerWantsOverwite);
     }
 
     //==================================Settings Saving =========================
+    
+    public void ExportToFile()
+    {
+        WavExporter wavExporter = new WavExporter(MusicLib.SampleRateLib[settingsFile.SampleRate], 29, noteManager?.GetNoteDictionary());
+        Debug.Log(wavExporter);
+    }
+    
     public void LoadSettings()
     {
         string settingsPath = GetFullPath(settingsFileName);
@@ -163,28 +173,30 @@ public class WavExporter
     private int sampleRate;
     private double durationInSeconds;
     private double[] frequencies;
-    
-    public WavExporter(int _sampleRate, double _durationInSeconds, List<Note> _notes)
+
+    public WavExporter(int _sampleRate, double _durationInSeconds, Dictionary<Vector2Int, Note> _notes)
     {
         sampleRate = _sampleRate;
         durationInSeconds = _durationInSeconds;
-
-        for (int i = 0; i < _notes.Count; i++)
+    
+        frequencies = new double[_notes.Count];
+        int index = 0;
+        foreach (var note in _notes.Values)
         {
-            this.frequencies[i] = _notes[i].Frequency;
+            frequencies[index++] = note.Frequency;
         }
-
-        // Generate raw audio data
+    
         byte[] audioData = GenerateAudio(sampleRate, durationInSeconds, frequencies);
-        WriteWavFile("output.wav", audioData, sampleRate);
+    
+        SaveFileDialog(audioData, sampleRate);
     }
 
     private byte[] GenerateAudio(int _sampleRate, double _durationInSeconds, double[] _frequencies)
     {
         int numSamples = (int)(_sampleRate * _durationInSeconds);
-        byte[] audioData = new byte[numSamples * 2]; // 16-bit PCM, hence * 2
+        byte[] audioData = new byte[numSamples * 2];
 
-        int maxAmplitude = 32767; // Maximum amplitude for 16-bit PCM
+        int maxAmplitude = 32767;
 
         for (int i = 0; i < numSamples; i++)
         {
@@ -203,12 +215,23 @@ public class WavExporter
         return audioData;
     }
 
+    private void SaveFileDialog(byte[] _audioData, int _sampleRate)
+    {
+        string filePath = StandaloneFileBrowser.SaveFilePanel("Save WAV file", "", "output", "wav");
+        if (filePath.Length == 0)
+        {
+            Debug.Log("No file selected.");
+            return;
+        }
+
+        WriteWavFile(filePath, _audioData, _sampleRate);
+    }
+
     private void WriteWavFile(string _filePath, byte[] _audioData, int _sampleRate)
     {
         using (var stream = new FileStream(_filePath, FileMode.Create))
         using (var writer = new BinaryWriter(stream))
         {
-            // Write the WAV header
             writer.Write(new char[] { 'R', 'I', 'F', 'F' });
             writer.Write(36 + _audioData.Length);
             writer.Write(new char[] { 'W', 'A', 'V', 'E' });

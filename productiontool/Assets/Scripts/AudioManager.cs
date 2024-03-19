@@ -39,7 +39,7 @@ public class AudioManager
         {
             clip.SetData(samples, 0);
             AudioSource source = GetAudioSource();
-            source.PlayOneShot(clip);
+            source?.PlayOneShot(clip);
         }
         else
         {

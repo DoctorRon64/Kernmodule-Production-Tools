@@ -121,11 +121,16 @@ public class NoteManager : ISaveable, ISaveSettings
         noteDatabase.Clear();
     }
 
+    public Dictionary<Vector2Int, Note> GetNoteDictionary()
+    {
+        return noteDatabase;
+    }
+
     private void PlayNotesAtPosition(int _newTime)
     {
         lock (gameManager.actionQueue)
         {
-            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime));
+            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime + 1));
         }
     }
 

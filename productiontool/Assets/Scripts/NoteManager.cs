@@ -130,7 +130,7 @@ public class NoteManager : ISaveable, ISaveSettings
     {
         lock (gameManager.actionQueue)
         {
-            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime + 1));
+            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime - 1));
         }
     }
 

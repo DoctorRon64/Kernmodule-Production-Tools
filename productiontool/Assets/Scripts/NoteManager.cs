@@ -21,26 +21,27 @@ public class NoteManager : ISaveable, ISaveSettings
     private static readonly Vector2Int minBound = new Vector2Int(-18, 0);
     private static readonly Vector2Int maxBound = new Vector2Int(10, -12);
     private int sampleRate = MusicLib.SampleRateLib[0];
-    
-    public NoteManager(GameManager _gameManager, AudioManager _audioManager , GameObject _notePrefab, Transform _noteParent)
+
+    public NoteManager(GameManager _gameManager, AudioManager _audioManager, GameObject _notePrefab,
+        Transform _noteParent)
     {
         this.audioManager = _audioManager;
         this.gameManager = _gameManager;
         this.noteParent = _noteParent;
-        
+
         noteDatabase = new Dictionary<Vector2Int, Note>();
         noteVisualizer = new NoteVisualizer(_notePrefab, _noteParent);
-        
+
         EventManager.AddListener<int>(EventType.TimerElapse, PlayNotesAtPosition);
         EventManager.AddListener<int>(EventType.SampleRate, GetSampleRate);
     }
-    
+
     public void PlaceOrRemoveNoteAtMousePosition(Vector3 _mousePos, bool _placeNote)
     {
         Vector2Int gridPosition = new Vector2Int(Mathf.RoundToInt(_mousePos.x), Mathf.RoundToInt(_mousePos.y));
-        
+
         if (IfMousePosOutBounds(gridPosition)) return;
-        
+
         if (gridPosition.x < minBound.x || gridPosition.x > maxBound.x ||
             gridPosition.y > minBound.y || gridPosition.y < maxBound.y)
             return;
@@ -57,12 +58,13 @@ public class NoteManager : ISaveable, ISaveSettings
         }
     }
 
-    private bool IfMousePosOutBounds(Vector2Int _pos){
+    private bool IfMousePosOutBounds(Vector2Int _pos)
+    {
         if (_pos.x < minBound.x || _pos.x >= maxBound.x) return false;
         if (_pos.y < minBound.y || _pos.y >= maxBound.y) return false;
         return true;
     }
-    
+
     private void PlaceNote(Vector2Int _pos)
     {
         if (!CheckFrequencyWithYPos(-_pos.y)) return;
@@ -73,6 +75,7 @@ public class NoteManager : ISaveable, ISaveSettings
         };
         noteDatabase.Add(_pos, newNote);
         noteVisualizer.VisualizeNotePlacement(noteDatabase[_pos]);
+        audioManager.PlayClip(newNote, sampleRate);
     }
 
     private void RemoveNote(Vector2Int _pos)
@@ -100,7 +103,7 @@ public class NoteManager : ISaveable, ISaveSettings
     public void Load(SaveFile _save)
     {
         ClearAllNotes();
-    
+
         foreach (var note in _save.noteDatabase)
         {
             noteDatabase.Add(note.Pos, note);
@@ -114,22 +117,30 @@ public class NoteManager : ISaveable, ISaveSettings
         {
             Object.Destroy(child.gameObject);
         }
+
         noteDatabase.Clear();
     }
 
-    public void PlayNotesAtPosition(int _timelinePosition)
+    private void PlayNotesAtPosition(int _newTime)
+    {
+        lock (gameManager.actionQueue)
+        {
+            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime));
+        }
+    }
+
+    public void UpdateValue(int _timelinePosition)
     {
         foreach (var note in noteDatabase.Values)
         {
             int notePosX = note.Pos.x - minBound.x;
             if (notePosX == _timelinePosition)
             {
-                Debug.Log("called the note corrosponding to time frame: " + _timelinePosition + " " + notePosX);
                 audioManager.PlayClip(note, sampleRate);
             }
         }
     }
-    
+
     public void Save(SaveFile _save)
     {
         List<Note> newNoteList = new List<Note>();
@@ -137,6 +148,7 @@ public class NoteManager : ISaveable, ISaveSettings
         {
             newNoteList.Add(note.Value);
         }
+
         _save.noteDatabase = newNoteList;
     }
 
@@ -159,6 +171,7 @@ public class NoteManager : ISaveable, ISaveSettings
         }
     }
 }
+
 //========================MUSIC LIBRARY======================================
 public static class MusicLib
 {

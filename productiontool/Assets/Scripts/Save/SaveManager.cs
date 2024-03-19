@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -154,5 +155,74 @@ public class SaveManager : ISaveSettings
     public void Save(SettingsFile _save)
     {
         _save.DoesPlayerWantOverwritePopUp = doesPlayerWantOverwritePopUp;
+    }
+}
+
+public class WavExporter
+{
+    private int sampleRate;
+    private double durationInSeconds;
+    private double[] frequencies;
+    
+    public WavExporter(int _sampleRate, double _durationInSeconds, List<Note> _notes)
+    {
+        sampleRate = _sampleRate;
+        durationInSeconds = _durationInSeconds;
+
+        for (int i = 0; i < _notes.Count; i++)
+        {
+            this.frequencies[i] = _notes[i].Frequency;
+        }
+
+        // Generate raw audio data
+        byte[] audioData = GenerateAudio(sampleRate, durationInSeconds, frequencies);
+        WriteWavFile("output.wav", audioData, sampleRate);
+    }
+
+    private byte[] GenerateAudio(int _sampleRate, double _durationInSeconds, double[] _frequencies)
+    {
+        int numSamples = (int)(_sampleRate * _durationInSeconds);
+        byte[] audioData = new byte[numSamples * 2]; // 16-bit PCM, hence * 2
+
+        int maxAmplitude = 32767; // Maximum amplitude for 16-bit PCM
+
+        for (int i = 0; i < numSamples; i++)
+        {
+            double sample = 0;
+            foreach (double frequency in _frequencies)
+            {
+                sample += Math.Sin(2 * Math.PI * frequency * i / _sampleRate);
+            }
+
+            short sampleValue = (short)(maxAmplitude * sample / _frequencies.Length);
+            byte[] sampleBytes = BitConverter.GetBytes(sampleValue);
+
+            Buffer.BlockCopy(sampleBytes, 0, audioData, i * 2, 2);
+        }
+
+        return audioData;
+    }
+
+    private void WriteWavFile(string _filePath, byte[] _audioData, int _sampleRate)
+    {
+        using (var stream = new FileStream(_filePath, FileMode.Create))
+        using (var writer = new BinaryWriter(stream))
+        {
+            // Write the WAV header
+            writer.Write(new char[] { 'R', 'I', 'F', 'F' });
+            writer.Write(36 + _audioData.Length);
+            writer.Write(new char[] { 'W', 'A', 'V', 'E' });
+            writer.Write(new char[] { 'f', 'm', 't', ' ' });
+            writer.Write(16);
+            writer.Write((short)1);
+            writer.Write((short)1);
+            writer.Write(_sampleRate);
+            writer.Write(_sampleRate * 2);
+            writer.Write((short)2);
+            writer.Write((short)16);
+            writer.Write(new char[] { 'd', 'a', 't', 'a' });
+            writer.Write(_audioData.Length);
+            writer.Write(_audioData);
+        }
     }
 }

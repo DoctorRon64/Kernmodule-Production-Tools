@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -93,8 +94,15 @@ public class UIManager : ISaveSettings, ISaveable
 
     private void UpdateTimelineSlider(int _newTime)
     {
-        Debug.Log("update Timer to value: " + _newTime);
-        timeLineSlider.value = _newTime - 1;
+        lock (gameManager.actionQueue)
+        {
+            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime - 1));
+        }
+    }
+
+    void UpdateValue(float _value)
+    {
+        timeLineSlider.value = _value;
     }
 
     private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback, List<CustomButton> _buttonList)

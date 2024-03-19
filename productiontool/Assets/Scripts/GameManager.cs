@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
     private Timeline timeLine;
     private CustomPopup overwriteConfirmationPopup;
 
+    public Queue<Action> actionQueue = new Queue<Action>();
+
     private bool isStopWhatPlayerIsDoing = false;
 
     [Header("Buttons")] 
@@ -42,7 +44,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject notePrefab;
     [SerializeField] private Transform allNotesParents;
 
-    [Header("Audio")] [SerializeField] private AudioSource audioSource;
+    [Header("Audio")] [SerializeField] private AudioSource[] audioSource;
 
     private void Awake()
     {
@@ -102,6 +104,16 @@ public class GameManager : MonoBehaviour
     {
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         cursor.UpdateCursorPosition(mouseWorldPosition);
+
+        // execute task queue
+        lock (actionQueue)
+        {
+            foreach (Action a in actionQueue)
+            {
+                a.Invoke();
+            }
+        }
+        actionQueue.Clear();
 
         if (isStopWhatPlayerIsDoing) return;
 

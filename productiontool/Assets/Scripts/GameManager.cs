@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     private UIManager uiManager;
     private NoteManager noteManager;
     private AudioManager audioManager;
-    
+
     private CustomCursor cursor;
     private Timeline timeLine;
     private CustomPopup overwriteConfirmationPopup;
@@ -21,26 +21,22 @@ public class GameManager : MonoBehaviour
 
     private bool isStopWhatPlayerIsDoing = false;
 
-    [Header("Buttons")] 
-    [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
+    [Header("Buttons")] [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
     [SerializeField] private List<Button> legacyButtonsTimeline = new List<Button>();
     [SerializeField] private List<Button> legacyButtonSaving = new List<Button>();
-    
-    [Header("UI")]
-    [SerializeField] private TMP_InputField saveFileInputField;
+
+    [Header("UI")] [SerializeField] private TMP_InputField saveFileInputField;
     [SerializeField] private GameObject overwriteIndicator;
     [SerializeField] private GameObject loopTimelineIndicator;
     [SerializeField] private GameObject popUp;
     [SerializeField] private TMP_InputField bpmInputField;
     [SerializeField] private TMP_Dropdown sampleRateDropdown;
     [SerializeField] private Toggle fullScreenToggle;
-    
-    [Header("Cursors")] 
-    [SerializeField] private SpriteRenderer cursorImageRenderer;
+
+    [Header("Cursors")] [SerializeField] private SpriteRenderer cursorImageRenderer;
     [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>();
 
-    [Header("Timeline")] 
-    [SerializeField] private Slider timeLineSlider;
+    [Header("Timeline")] [SerializeField] private Slider timeLineSlider;
     [SerializeField] private GameObject notePrefab;
     [SerializeField] private Transform allNotesParents;
 
@@ -52,8 +48,8 @@ public class GameManager : MonoBehaviour
         SetCurrentSelectedTool(0);
 
         foreach (var field in typeof(GameManager).GetFields(
-                     System.Reflection.BindingFlags.NonPublic | 
-                     System.Reflection.BindingFlags.Instance | 
+                     System.Reflection.BindingFlags.NonPublic |
+                     System.Reflection.BindingFlags.Instance |
                      System.Reflection.BindingFlags.DeclaredOnly))
         {
             if (typeof(ISaveable).IsAssignableFrom(field.FieldType))
@@ -68,6 +64,7 @@ public class GameManager : MonoBehaviour
                 saveManager.AddSettings(settings);
             }
         }
+
         saveManager.LoadSettings();
     }
 
@@ -75,7 +72,7 @@ public class GameManager : MonoBehaviour
     {
         //want anders word valentijn boos
         saveManager?.SaveSettings();
-        
+
         timeLine?.RemoveListener();
         uiManager?.RemoveListeners();
         EventManager.RemoveAllListeners();
@@ -86,11 +83,12 @@ public class GameManager : MonoBehaviour
         Instance = this;
         timeLine = new Timeline(Instance);
 
-       
+
         uiManager = new UIManager(Instance,
             legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
             new List<Action<int>> { SetCurrentSelectedTool, SetTimeline, SaveOrLoad },
-            overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown, fullScreenToggle
+            overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown,
+            fullScreenToggle
         );
         audioManager = new AudioManager(audioSource);
         noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
@@ -99,7 +97,7 @@ public class GameManager : MonoBehaviour
         cursor = new CustomCursor(cursorImageRenderer);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
     }
-    
+
     private void Update()
     {
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -113,23 +111,41 @@ public class GameManager : MonoBehaviour
                 a.Invoke();
             }
         }
+
         actionQueue.Clear();
 
-        if (isStopWhatPlayerIsDoing) return;
+        if ( /*Input.GetKeyDown(KeyCode.LeftControl) && */Input.GetKeyDown(KeyCode.Z))
+        {
+            noteManager?.UndoLastCommand();
+        }
+
+        if ( /*Input.GetKeyDown(KeyCode.LeftControl) && */Input.GetKeyDown(KeyCode.Y))
+        {
+            noteManager?.RedoLastCommand();
+        }
 
         if (toolManager?.GetSelectedTool() == 1 && Input.GetMouseButton(0))
-            noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, true);
-
+        {
+            Note existingNote = noteManager?.GetNoteAtMousePosition(mouseWorldPosition);
+            if (existingNote != null) return;
+            ICommand placeNoteCommand = new EditNoteCommand(noteManager, mouseWorldPosition, true);
+            noteManager?.ExecuteCommand(placeNoteCommand);
+        } 
         if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
-            noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, false);
+        {
+            Note noteToRemove = noteManager?.GetNoteAtMousePosition(mouseWorldPosition);
+            if (noteToRemove == null) return;
+            ICommand removeNoteCommand = new EditNoteCommand(noteManager, mouseWorldPosition, false);
+            noteManager?.ExecuteCommand(removeNoteCommand);
+        }
     }
 
-    public int GetTimelineBPM()
+    public int GetTimelineBpm()
     {
         return timeLine.GetBpm();
     }
 
-    public void SetCurrentSelectedTool(int _toolIndex)
+    private void SetCurrentSelectedTool(int _toolIndex)
     {
         if (isStopWhatPlayerIsDoing) return;
         Cursor.visible = _toolIndex == 0;

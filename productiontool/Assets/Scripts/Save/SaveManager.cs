@@ -34,10 +34,10 @@ public class SaveManager : ISaveSettings
 
     public void ExportToFile()
     {
-        Debug.Log(MusicLib.SampleRateLib[settingsFile.SampleRate] + ":" + 29 + ":" + gameManager.GetTimelineBPM() +
+        Debug.Log(MusicLib.SampleRateLib[settingsFile.SampleRate] + ":" + 29 + ":" + gameManager.GetTimelineBpm() +
                   ":" + noteManager?.GetNoteDictionary());
         WavExporter wavExporter = new WavExporter(MusicLib.SampleRateLib[settingsFile.SampleRate], 29,
-            gameManager.GetTimelineBPM(), noteManager?.GetNoteDictionary());
+            gameManager.GetTimelineBpm(), noteManager?.GetNoteDictionary());
         Debug.Log(wavExporter);
     }
 

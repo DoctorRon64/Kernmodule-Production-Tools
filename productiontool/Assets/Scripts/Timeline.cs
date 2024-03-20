@@ -33,6 +33,11 @@ public class Timeline : ISaveable, ISaveSettings
         timer.Interval = milliSeconds;
     }
 
+    public int GetBpm()
+    {
+        return BPM;
+    }
+
     public void StartTimeline()
     {
         if (timer.Enabled) return;
@@ -92,7 +97,6 @@ public class Timeline : ISaveable, ISaveSettings
 
     public void Save(SaveFile _load)
     {
-        Debug.Log(_load);
         _load.BPM = BPM;
     }
 

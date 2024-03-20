@@ -18,8 +18,8 @@ public class NoteManager : ISaveable, ISaveSettings
     private readonly GameManager gameManager;
     private readonly AudioManager audioManager;
 
-    private static readonly Vector2Int minBound = new Vector2Int(-18, 0);
-    private static readonly Vector2Int maxBound = new Vector2Int(10, -12);
+    public static readonly Vector2Int MinBound = new Vector2Int(-18, 0);
+    public static readonly Vector2Int MaxBound = new Vector2Int(10, -12);
     private int sampleRate = MusicLib.SampleRateLib[0];
 
     public NoteManager(GameManager _gameManager, AudioManager _audioManager, GameObject _notePrefab,
@@ -42,8 +42,8 @@ public class NoteManager : ISaveable, ISaveSettings
 
         if (IfMousePosOutBounds(gridPosition)) return;
 
-        if (gridPosition.x < minBound.x || gridPosition.x > maxBound.x ||
-            gridPosition.y > minBound.y || gridPosition.y < maxBound.y)
+        if (gridPosition.x < MinBound.x || gridPosition.x > MaxBound.x ||
+            gridPosition.y > MinBound.y || gridPosition.y < MaxBound.y)
             return;
 
         if (_placeNote)
@@ -60,8 +60,8 @@ public class NoteManager : ISaveable, ISaveSettings
 
     private bool IfMousePosOutBounds(Vector2Int _pos)
     {
-        if (_pos.x < minBound.x || _pos.x >= maxBound.x) return false;
-        if (_pos.y < minBound.y || _pos.y >= maxBound.y) return false;
+        if (_pos.x < MinBound.x || _pos.x >= MaxBound.x) return false;
+        if (_pos.y < MinBound.y || _pos.y >= MaxBound.y) return false;
         return true;
     }
 
@@ -138,7 +138,7 @@ public class NoteManager : ISaveable, ISaveSettings
     {
         foreach (var note in noteDatabase.Values)
         {
-            int notePosX = note.Pos.x - minBound.x;
+            int notePosX = note.Pos.x - MinBound.x;
             if (notePosX == _timelinePosition)
             {
                 audioManager.PlayClip(note, sampleRate);

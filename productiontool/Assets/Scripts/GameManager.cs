@@ -124,6 +124,11 @@ public class GameManager : MonoBehaviour
             noteManager?.PlaceOrRemoveNoteAtMousePosition(mouseWorldPosition, false);
     }
 
+    public int GetTimelineBPM()
+    {
+        return timeLine.GetBpm();
+    }
+
     public void SetCurrentSelectedTool(int _toolIndex)
     {
         if (isStopWhatPlayerIsDoing) return;

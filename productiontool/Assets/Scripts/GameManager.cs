@@ -11,9 +11,8 @@ public class GameManager : MonoBehaviour
     private ToolManager toolManager;
     private UIManager uiManager;
     private NoteManager noteManager;
+    private InputManager inputManager;
     private AudioManager audioManager;
-
-    private CustomCursor cursor;
     private Timeline timeLine;
     private CustomPopup overwriteConfirmationPopup;
 
@@ -45,7 +44,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         InitializeManagers();
-        SetCurrentSelectedTool(0);
+        EventManager.InvokeEvent(EventType.SelectTool, 0);
 
         foreach (var field in typeof(GameManager).GetFields(
                      System.Reflection.BindingFlags.NonPublic |
@@ -86,23 +85,20 @@ public class GameManager : MonoBehaviour
 
         uiManager = new UIManager(Instance,
             legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
-            new List<Action<int>> { SetCurrentSelectedTool, SetTimeline, SaveOrLoad },
+            new List<Action<int>> { SetTimeline, SaveOrLoad },
             overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown,
             fullScreenToggle
         );
         audioManager = new AudioManager(audioSource);
         noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
         saveManager = new SaveManager(Instance, noteManager);
-        toolManager = new ToolManager();
-        cursor = new CustomCursor(cursorImageRenderer);
+        toolManager = new ToolManager(cursorImageRenderer, cursorIcons);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
+        inputManager  = new InputManager(noteManager, toolManager);
     }
 
     private void Update()
     {
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        cursor.UpdateCursorPosition(mouseWorldPosition);
-
         // execute task queue
         lock (actionQueue)
         {
@@ -111,46 +107,16 @@ public class GameManager : MonoBehaviour
                 a.Invoke();
             }
         }
-
         actionQueue.Clear();
-
-        if ( /*Input.GetKeyDown(KeyCode.LeftControl) && */Input.GetKeyDown(KeyCode.Z))
-        {
-            noteManager?.UndoLastCommand();
-        }
-
-        if ( /*Input.GetKeyDown(KeyCode.LeftControl) && */Input.GetKeyDown(KeyCode.Y))
-        {
-            noteManager?.RedoLastCommand();
-        }
-
-        if (toolManager?.GetSelectedTool() == 1 && Input.GetMouseButton(0))
-        {
-            Note existingNote = noteManager?.GetNoteAtMousePosition(mouseWorldPosition);
-            if (existingNote != null) return;
-            ICommand placeNoteCommand = new EditNoteCommand(noteManager, mouseWorldPosition, true);
-            noteManager?.ExecuteCommand(placeNoteCommand);
-        } 
-        if (toolManager?.GetSelectedTool() == 2 && Input.GetMouseButton(0))
-        {
-            Note noteToRemove = noteManager?.GetNoteAtMousePosition(mouseWorldPosition);
-            if (noteToRemove == null) return;
-            ICommand removeNoteCommand = new EditNoteCommand(noteManager, mouseWorldPosition, false);
-            noteManager?.ExecuteCommand(removeNoteCommand);
-        }
+        
+        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        toolManager?.UpdateCursor(mouseWorldPosition);
+        inputManager?.Update(mouseWorldPosition);
     }
 
     public int GetTimelineBpm()
     {
         return timeLine.GetBpm();
-    }
-
-    private void SetCurrentSelectedTool(int _toolIndex)
-    {
-        if (isStopWhatPlayerIsDoing) return;
-        Cursor.visible = _toolIndex == 0;
-        cursor.ChangeCursorImage(cursorIcons[_toolIndex]);
-        toolManager?.SetCurrentSelectedTool(_toolIndex);
     }
 
     private void SetTimeline(int _timelineIndex)
@@ -207,12 +173,13 @@ public class GameManager : MonoBehaviour
     public void TogglePlayerStopDoing()
     {
         isStopWhatPlayerIsDoing = !isStopWhatPlayerIsDoing;
+        toolManager?.SetIsStoPWhatPlayerDoing();
     }
 
     public void HandleOverwriteConfirmation(string _fileName)
     {
         saveFileInputField.interactable = false;
-        SetCurrentSelectedTool(0);
+        EventManager.InvokeEvent(EventType.SelectTool, 0);
         TogglePlayerStopDoing();
         overwriteConfirmationPopup.ShowConfirmationPopup(
             () =>

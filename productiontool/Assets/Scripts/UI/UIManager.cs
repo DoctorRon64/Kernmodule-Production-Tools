@@ -8,9 +8,10 @@ using UnityEngine.UI;
 
 public class UIManager : ISaveSettings, ISaveable
 {
-    private readonly List<CustomButton> toolButtons = new List<CustomButton>();
-    private readonly List<CustomButton> timelineButtons = new List<CustomButton>();
-    private readonly List<CustomButton> savingButtons = new List<CustomButton>();
+    private readonly List<Button> legacyButtonsTimeline;
+    private readonly List<Button> legacyButtonsTools;
+    private readonly List<Button> legacyButtonsSaving;
+    
     private readonly GameObject overwriteIndicator;
     private readonly GameObject loopIndicator;
     private readonly Slider timeLineSlider;
@@ -33,10 +34,14 @@ public class UIManager : ISaveSettings, ISaveable
         bpmField = _bmpInputField;
         dropdownSampleRate = _sampleRate;
         fullscreenToggle = _fullScreenToggle;
+
+        legacyButtonsTools = _legacyButtonsTools;
+        legacyButtonsTimeline = _legacyButtonsTimeline;
+        legacyButtonsSaving = _legacyButtonSaving;
         
-        InitializeButtons(_legacyButtonsTools, _allActions[0], toolButtons);
-        InitializeButtons(_legacyButtonsTimeline, _allActions[1], timelineButtons);
-        InitializeButtons(_legacyButtonSaving, _allActions[2], savingButtons);
+        InitializeToolButtons(legacyButtonsTools);
+        InitializeButtons(legacyButtonsTimeline, _allActions[0]);
+        InitializeButtons(legacyButtonsSaving, _allActions[1]);
 
         EventManager.AddListener<int>(EventType.TimerElapse, UpdateTimelineSlider);
         EventManager.Parameterless.AddListener(EventType.Repeat, ToggleLoopIndicator);
@@ -105,30 +110,40 @@ public class UIManager : ISaveSettings, ISaveable
         timeLineSlider.value = _value;
     }
 
-    private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback, List<CustomButton> _buttonList)
+    private void InitializeButtons(List<Button> _buttons, Action<int> _onClickCallback)
     {
-        foreach (var button in _buttons)
+        for (int i = 0; i < _buttons.Count; i++)
         {
-            var customButton = new CustomButton(button, _buttonList.Count);
-            customButton.AddListener(_onClickCallback);
-            _buttonList.Add(customButton);
+            int buttonIndex = i;
+            _buttons[i].onClick.AddListener(() => _onClickCallback(buttonIndex));
+        }
+    }
+    
+    private void InitializeToolButtons(List<Button> _buttons)
+    {
+        for (int i = 0; i < _buttons.Count; i++)
+        {
+            int buttonIndex = i;
+            _buttons[i].onClick.AddListener(() => EventManager.InvokeEvent(EventType.SelectTool, buttonIndex));
         }
     }
 
+
     public void RemoveListeners()
     {
-        RemoveListenersFromButtons(toolButtons);
-        RemoveListenersFromButtons(timelineButtons);
-        RemoveListenersFromButtons(savingButtons);
+        RemoveListenersFromButtons(legacyButtonsTools);
+        RemoveListenersFromButtons(legacyButtonsTimeline);
+        RemoveListenersFromButtons(legacyButtonsSaving);
+        
         bpmField.onValueChanged.RemoveAllListeners();
         dropdownSampleRate.onValueChanged.RemoveAllListeners();
     }
-
-    private void RemoveListenersFromButtons(List<CustomButton> _buttons)
+    
+    private void RemoveListenersFromButtons(List<Button> _buttons)
     {
         foreach (var button in _buttons)
         {
-            button.RemoveAllListeners();
+            button.onClick.RemoveAllListeners();
         }
     }
 

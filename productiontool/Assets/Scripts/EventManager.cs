@@ -7,7 +7,8 @@ public enum EventType
     TimerElapse,
     SampleRate,
     Repeat,
-    OverwriteToggle
+    OverwriteToggle,
+    SelectTool
 }
 
 public static class EventManager

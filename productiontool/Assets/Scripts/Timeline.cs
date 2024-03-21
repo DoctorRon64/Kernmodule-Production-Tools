@@ -58,6 +58,8 @@ public class Timeline : ISaveable, ISaveSettings
     {
         timer.Stop();
         isPaused = false;
+        currentTimePos = 0;
+        EventManager.InvokeEvent(EventType.TimerElapse, currentTimePos);
     }
 
     private void ToggleRepeatTimeline()

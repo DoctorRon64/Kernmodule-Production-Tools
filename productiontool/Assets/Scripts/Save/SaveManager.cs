@@ -34,11 +34,19 @@ public class SaveManager : ISaveSettings
 
     public void ExportToFile()
     {
-        Debug.Log(MusicLib.SampleRateLib[settingsFile.SampleRate] + ":" + 29 + ":" + gameManager.GetTimelineBpm() +
-                  ":" + noteManager?.GetNoteDictionary());
-        WavExporter wavExporter = new WavExporter(MusicLib.SampleRateLib[settingsFile.SampleRate], 29,
-            gameManager.GetTimelineBpm(), noteManager?.GetNoteDictionary());
-        Debug.Log(wavExporter);
+        WavExporter wavExporter = new WavExporter(
+            MusicLib.SampleRateLib[settingsFile.SampleRate], 
+            CalculateTimelineDuration(gameManager.GetTimelineBpm()), 
+            gameManager.GetTimelineBpm(), 
+            noteManager?.GetNoteDictionary()
+            );
+    }
+
+    private int CalculateTimelineDuration(int _bpm)
+    {
+        float durationPerBeat = 60f / _bpm;
+        int totalDuration = Mathf.RoundToInt( durationPerBeat * 29);
+        return totalDuration;
     }
 
     public void LoadSettings()
@@ -205,7 +213,7 @@ public class WavExporter
         SaveFileDialog(audioData, sampleRate);
     }
 
-    private byte[] GenerateAudio(int _sampleRate, double _durationInSeconds, int _bpm, float[] frequencies)
+    private byte[] GenerateAudio(int _sampleRate, double _durationInSeconds, int _bpm, float[] _frequencies)
     {
         int numSamples = (int)(_sampleRate * _durationInSeconds);
         byte[] audioData = new byte[numSamples * 2];
@@ -214,7 +222,7 @@ public class WavExporter
         int remainingSamples = numSamples;
         double[] samples = new double[numSamples];
 
-        foreach (float frequency in frequencies)
+        foreach (float frequency in _frequencies)
         {
             double noteDurationInSeconds = beatDurationInSeconds;
             int noteNumSamples = (int)(_sampleRate * noteDurationInSeconds);
@@ -239,20 +247,14 @@ public class WavExporter
         // Normalize samples to ensure they stay within range
         double maxSample = samples.Max();
         double minSample = samples.Min();
-        double range = Math.Max(Math.Abs(maxSample), Math.Abs(minSample));
-        double scale = maxAmplitude / range;
+        double maxAbsSample = Math.Max(Math.Abs(maxSample), Math.Abs(minSample));
+        double scale = maxAmplitude / maxAbsSample;
 
-        // Convert double samples to short samples
-        short[] shortSamples = new short[numSamples];
+        // Convert double samples to short samples and apply normalization
         for (int i = 0; i < numSamples; i++)
         {
-            shortSamples[i] = (short)(samples[i] * scale);
-        }
-
-        // Convert short samples to bytes
-        for (int i = 0; i < numSamples; i++)
-        {
-            byte[] sampleBytes = BitConverter.GetBytes(shortSamples[i]);
+            short normalizedSample = (short)(samples[i] * scale);
+            byte[] sampleBytes = BitConverter.GetBytes(normalizedSample);
             Buffer.BlockCopy(sampleBytes, 0, audioData, i * 2, 2);
         }
 

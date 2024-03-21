@@ -14,7 +14,6 @@ public class AudioManager
     {
         const float noteLength = 0.3f;
         
-        // Calculate the sample length based on a longer duration
         float fadeOutDuration = 0.05f;
         int sampleLength = Mathf.CeilToInt((_sampleRate * (noteLength + fadeOutDuration)));
         
@@ -33,7 +32,6 @@ public class AudioManager
         
         string randomClipName = GenerateUniqueClipName();
         
-        // Generate audio file
         AudioClip clip = AudioClip.Create(randomClipName, sampleLength, 1 , _sampleRate, false);
         if (clip != null)
         {

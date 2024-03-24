@@ -41,33 +41,3 @@ public class EditNoteCommand : ICommand
         }
     }
 }
-
-public class UndoCommand : ICommand
-{
-    private readonly NoteManager noteManager;
-
-    public UndoCommand(NoteManager _noteManager)
-    {
-        noteManager = _noteManager;
-    }
-
-    public void Execute()
-    {
-        noteManager.UndoLastCommand();
-    }
-}
-
-public class RedoCommand : ICommand
-{
-    private readonly NoteManager noteManager;
-
-    public RedoCommand(NoteManager _noteManager)
-    {
-        noteManager = _noteManager;
-    }
-
-    public void Execute()
-    {
-        noteManager.RedoLastCommand();
-    }
-}

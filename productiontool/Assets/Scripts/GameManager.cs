@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -14,10 +15,12 @@ public class GameManager : MonoBehaviour
     private InputManager inputManager;
     private AudioManager audioManager;
     private Timeline timeLine;
+    
+    //objects
     private CustomPopup overwriteConfirmationPopup;
-
+    private CustomHoverMessage customHoverMessage;
+    
     public Queue<Action> actionQueue = new Queue<Action>();
-
     private bool isStopWhatPlayerIsDoing = false;
 
     [Header("Buttons")] [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
@@ -31,6 +34,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_InputField bpmInputField;
     [SerializeField] private TMP_Dropdown sampleRateDropdown;
     [SerializeField] private Toggle fullScreenToggle;
+    [SerializeField] private TextMeshProUGUI customHoverText;
+    [SerializeField] private List<string> hoverText; 
 
     [Header("Cursors")] [SerializeField] private SpriteRenderer cursorImageRenderer;
     [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>();
@@ -81,13 +86,12 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         timeLine = new Timeline(Instance);
-
-
+        
         uiManager = new UIManager(Instance,
             legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
             new List<Action<int>> { SetTimeline, SaveOrLoad },
             overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown,
-            fullScreenToggle
+            fullScreenToggle, hoverText, customHoverText
         );
         audioManager = new AudioManager(audioSource);
         noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
@@ -109,8 +113,11 @@ public class GameManager : MonoBehaviour
         }
         actionQueue.Clear();
         
+        if (saveFileInputField.isFocused) { EventManager.InvokeEvent(EventType.SelectTool, 0);}
+        inputManager?.ToggleIsInHoverText(saveFileInputField.isFocused);
+
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        toolManager?.UpdateCursor(mouseWorldPosition);
+        toolManager?.Update(mouseWorldPosition);
         inputManager?.Update(mouseWorldPosition);
     }
 

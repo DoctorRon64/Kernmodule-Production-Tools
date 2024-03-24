@@ -8,6 +8,7 @@ using SFB;
 public class SaveManager : ISaveSettings
 {
     private readonly string defaultFileName = "saveFile";
+    private string lastNamedFile;
     private readonly List<ISaveable> saveableNotes;
     private readonly List<ISaveSettings> saveablesSettings;
     private SaveFile saveFile;
@@ -38,14 +39,15 @@ public class SaveManager : ISaveSettings
             MusicLib.SampleRateLib[settingsFile.SampleRate], 
             CalculateTimelineDuration(gameManager.GetTimelineBpm()), 
             gameManager.GetTimelineBpm(), 
-            noteManager?.GetNoteDictionary()
+            noteManager?.GetNoteDictionary(),
+            lastNamedFile
             );
     }
 
-    private int CalculateTimelineDuration(int _bpm)
+    private float CalculateTimelineDuration(int _bpm)
     {
         float durationPerBeat = 60f / _bpm;
-        int totalDuration = Mathf.RoundToInt( durationPerBeat * 29);
+        float totalDuration = durationPerBeat * 29;
         return totalDuration;
     }
 
@@ -84,6 +86,7 @@ public class SaveManager : ISaveSettings
     {
         SaveSettings();
         saveFile = new SaveFile();
+        lastNamedFile = _saveFileName;
         string fullpath = _saveFileName;
 
         if (_isOverwrite)
@@ -108,6 +111,7 @@ public class SaveManager : ISaveSettings
     public void LoadTool(string _saveFileName)
     {
         saveFile = new SaveFile();
+        lastNamedFile = _saveFileName;
         string fullpath = GetFullPath(_saveFileName);
 
         if (!File.Exists(fullpath))
@@ -186,12 +190,14 @@ public class SaveManager : ISaveSettings
 public class WavExporter
 {
     private int sampleRate;
-    private double durationInSeconds;
     private int bpm;
+    private float durationInSeconds;
     private float[] frequencies;
-
-    public WavExporter(int _sampleRate, double _durationInSeconds, int _bpm, Dictionary<Vector2Int, Note> _notes)
+    private string outputName;
+    
+    public WavExporter(int _sampleRate, float _durationInSeconds, int _bpm, Dictionary<Vector2Int, Note> _notes, string _outputName)
     {
+        outputName = _outputName;
         sampleRate = _sampleRate;
         durationInSeconds = _durationInSeconds;
         bpm = _bpm;
@@ -204,10 +210,6 @@ public class WavExporter
 
         frequencies = freqList.ToArray();
 
-        Debug.Log("Total Duration: " + durationInSeconds);
-        int numSamples = (int)(_sampleRate * durationInSeconds);
-        Debug.Log("Total Samples: " + numSamples);
-
         byte[] audioData = GenerateAudio(sampleRate, durationInSeconds, bpm, frequencies);
 
         SaveFileDialog(audioData, sampleRate);
@@ -215,6 +217,12 @@ public class WavExporter
 
     private byte[] GenerateAudio(int _sampleRate, double _durationInSeconds, int _bpm, float[] _frequencies)
     {
+        if (_frequencies == null || _frequencies.Length == 0)
+        {
+            Debug.LogError("No frequencies provided for audio generation.");
+            return null;
+        }
+
         int numSamples = (int)(_sampleRate * _durationInSeconds);
         byte[] audioData = new byte[numSamples * 2];
         int maxAmplitude = 32767;
@@ -238,7 +246,7 @@ public class WavExporter
             for (int i = 0; i < noteNumSamples && remainingSamples > 0; i++)
             {
                 double sample = Math.Sin(2 * Math.PI * frequency * i / _sampleRate);
-                int audioIndex = (numSamples - remainingSamples + i);
+                int audioIndex = numSamples - remainingSamples + i; 
                 samples[audioIndex] += sample;
                 remainingSamples--;
             }
@@ -263,8 +271,8 @@ public class WavExporter
 
     private void SaveFileDialog(byte[] _audioData, int _sampleRate)
     {
-        string filePath = StandaloneFileBrowser.SaveFilePanel("Save WAV file", "", "mySongName", "wav");
-        if (filePath.Length == 0)
+        string filePath = StandaloneFileBrowser.SaveFilePanel("Save WAV file", "", outputName, "wav");
+        if (string.IsNullOrEmpty(filePath))
         {
             Debug.Log("No file selected.");
             return;
@@ -275,23 +283,30 @@ public class WavExporter
 
     private void WriteWavFile(string _filePath, byte[] _audioData, int _sampleRate)
     {
-        using (var stream = new FileStream(_filePath, FileMode.Create))
-        using (var writer = new BinaryWriter(stream))
+        try
         {
-            writer.Write(new char[] { 'R', 'I', 'F', 'F' });
-            writer.Write(36 + _audioData.Length); // RIFF chunk size
-            writer.Write(new char[] { 'W', 'A', 'V', 'E' });
-            writer.Write(new char[] { 'f', 'm', 't', ' ' });
-            writer.Write(16); // Size of fmt chunk
-            writer.Write((short)1); // Audio format (PCM)
-            writer.Write((short)1); // Num channels
-            writer.Write(_sampleRate); // Sample rate
-            writer.Write(_sampleRate * 2); // Byte rate
-            writer.Write((short)2); // Block align
-            writer.Write((short)16); // Bits per sample
-            writer.Write(new char[] { 'd', 'a', 't', 'a' });
-            writer.Write(_audioData.Length); // Data chunk size
-            writer.Write(_audioData);
+            using (var stream = new FileStream(_filePath, FileMode.Create))
+            using (var writer = new BinaryWriter(stream))
+            {
+                writer.Write(new char[] { 'R', 'I', 'F', 'F' });
+                writer.Write(36 + _audioData.Length); // RIFF chunk size
+                writer.Write(new char[] { 'W', 'A', 'V', 'E' });
+                writer.Write(new char[] { 'f', 'm', 't', ' ' });
+                writer.Write(16); // Size of fmt chunk
+                writer.Write((short)1); // Audio format (PCM)
+                writer.Write((short)1); // Num channels
+                writer.Write(_sampleRate); // Sample rate
+                writer.Write(_sampleRate * 2); // Byte rate
+                writer.Write((short)2); // Block align
+                writer.Write((short)16); // Bits per sample
+                writer.Write(new char[] { 'd', 'a', 't', 'a' });
+                writer.Write(_audioData.Length); // Data chunk size
+                writer.Write(_audioData);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error writing WAV file: {ex.Message}");
         }
     }
 }

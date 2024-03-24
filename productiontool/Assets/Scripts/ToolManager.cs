@@ -19,7 +19,7 @@ public class ToolManager
         cursor = new CustomCursor(cursorImageRenderer);
     }
 
-    public void UpdateCursor(Vector3 _pos)
+    public void Update(Vector3 _pos)
     {
         cursor?.UpdateCursorPosition(_pos);
     }

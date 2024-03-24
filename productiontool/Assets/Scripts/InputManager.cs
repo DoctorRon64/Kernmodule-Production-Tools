@@ -4,15 +4,22 @@ public class InputManager
 {
     private NoteManager noteManager;
     private ToolManager toolManager;
-
+    private bool isInHoverText;
+    
     public InputManager(NoteManager _noteManager, ToolManager _toolManager)
     {
         noteManager = _noteManager;
         toolManager = _toolManager;
     }
 
+    public void ToggleIsInHoverText(bool _toggle)
+    {
+        isInHoverText = _toggle;
+    }
+    
     public void Update(Vector3 _mousePos)
     {
+        if (isInHoverText) return;
         CheckUndoRedoInput();
         CheckToolInput(_mousePos);
         SelectTool();
@@ -38,7 +45,7 @@ public class InputManager
         {
             EventManager.InvokeEvent(EventType.SelectTool, 0);
         }
-
+        
         if (Input.GetKeyDown(KeyCode.B))
         {
             EventManager.InvokeEvent(EventType.SelectTool, 1);

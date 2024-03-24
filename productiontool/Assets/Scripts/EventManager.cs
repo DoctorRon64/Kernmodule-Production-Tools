@@ -8,7 +8,9 @@ public enum EventType
     SampleRate,
     Repeat,
     OverwriteToggle,
-    SelectTool
+    SelectTool,
+    ButtonHoverText,
+    onMouseHover
 }
 
 public static class EventManager

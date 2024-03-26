@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -19,15 +19,15 @@ public class GameManager : MonoBehaviour
     //objects
     private CustomPopup overwriteConfirmationPopup;
     private CustomHoverMessage customHoverMessage;
-    
-    public Queue<Action> actionQueue = new Queue<Action>();
     private bool isStopWhatPlayerIsDoing = false;
 
-    [Header("Buttons")] [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
+    [Header("Buttons")] 
+    [SerializeField] private List<Button> legacyButtonsTools = new List<Button>();
     [SerializeField] private List<Button> legacyButtonsTimeline = new List<Button>();
     [SerializeField] private List<Button> legacyButtonSaving = new List<Button>();
 
-    [Header("UI")] [SerializeField] private TMP_InputField saveFileInputField;
+    [Header("UI")] 
+    [SerializeField] private TMP_InputField saveFileInputField;
     [SerializeField] private GameObject overwriteIndicator;
     [SerializeField] private GameObject loopTimelineIndicator;
     [SerializeField] private GameObject popUp;
@@ -37,14 +37,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI customHoverText;
     [SerializeField] private List<string> hoverText; 
 
-    [Header("Cursors")] [SerializeField] private SpriteRenderer cursorImageRenderer;
+    [Header("Cursors")] 
+    [SerializeField] private SpriteRenderer cursorImageRenderer;
     [SerializeField] private List<Sprite> cursorIcons = new List<Sprite>();
 
-    [Header("Timeline")] [SerializeField] private Slider timeLineSlider;
+    [Header("Timeline")] 
+    [SerializeField] private Slider timeLineSlider;
     [SerializeField] private GameObject notePrefab;
     [SerializeField] private Transform allNotesParents;
 
-    [Header("Audio")] [SerializeField] private AudioSource[] audioSource;
+    [Header("Audio")] 
+    [SerializeField] private AudioSource[] audioSource;
 
     private void Awake()
     {
@@ -52,9 +55,9 @@ public class GameManager : MonoBehaviour
         EventManager.InvokeEvent(EventType.SelectTool, 0);
 
         foreach (var field in typeof(GameManager).GetFields(
-                     System.Reflection.BindingFlags.NonPublic |
-                     System.Reflection.BindingFlags.Instance |
-                     System.Reflection.BindingFlags.DeclaredOnly))
+                     BindingFlags.NonPublic |
+                     BindingFlags.Instance |
+                     BindingFlags.DeclaredOnly))
         {
             if (typeof(ISaveable).IsAssignableFrom(field.FieldType))
             {
@@ -85,16 +88,16 @@ public class GameManager : MonoBehaviour
     private void InitializeManagers()
     {
         Instance = this;
-        timeLine = new Timeline(Instance);
+        timeLine = new Timeline();
         
-        uiManager = new UIManager(Instance,
+        uiManager = new UIManager(
             legacyButtonsTools, legacyButtonsTimeline, legacyButtonSaving,
             new List<Action<int>> { SetTimeline, SaveOrLoad },
             overwriteIndicator, loopTimelineIndicator, timeLineSlider, bpmInputField, sampleRateDropdown,
             fullScreenToggle, hoverText, customHoverText
         );
         audioManager = new AudioManager(audioSource);
-        noteManager = new NoteManager(Instance, audioManager, notePrefab, allNotesParents);
+        noteManager = new NoteManager(audioManager, notePrefab, allNotesParents);
         saveManager = new SaveManager(Instance, noteManager);
         toolManager = new ToolManager(cursorImageRenderer, cursorIcons);
         overwriteConfirmationPopup = new CustomPopup(popUp, Instance);
@@ -103,15 +106,8 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        // execute task queue
-        lock (actionQueue)
-        {
-            foreach (Action a in actionQueue)
-            {
-                a.Invoke();
-            }
-        }
-        actionQueue.Clear();
+        ActionQueueManager.Instance.ExecuteActions();
+        ActionQueueManager.Instance.ClearQueue();
         
         if (saveFileInputField.isFocused) { EventManager.InvokeEvent(EventType.SelectTool, 0);}
         inputManager?.ToggleIsInHoverText(saveFileInputField.isFocused);

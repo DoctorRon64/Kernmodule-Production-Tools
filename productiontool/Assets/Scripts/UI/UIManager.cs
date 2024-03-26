@@ -21,18 +21,16 @@ public class UIManager : ISaveSettings, ISaveable
     private readonly TMP_InputField bpmField;
     private readonly TMP_Dropdown dropdownSampleRate;
     private readonly Toggle fullscreenToggle;
-    private readonly GameManager gameManager;
     private bool fullscreenOnOrOff;
     private int hoverTextIndex;
     
-    public UIManager(GameManager _gameManger,
+    public UIManager(
         List<Button> _legacyButtonsTools, List<Button> _legacyButtonsTimeline, List<Button> _legacyButtonSaving,
         List<Action<int>> _allActions, GameObject _overwriteIndicator, GameObject _loopIndicator, Slider _timeLineSlider,  TMP_InputField _bmpInputField,
         TMP_Dropdown _sampleRate, Toggle _fullScreenToggle, List<string> _hoverText, TextMeshProUGUI _customHoverObject
         )
     {
         timeLineSlider = _timeLineSlider;
-        gameManager = _gameManger;
         loopIndicator = _loopIndicator;
         overwriteIndicator = _overwriteIndicator;
         bpmField = _bmpInputField;
@@ -106,10 +104,7 @@ public class UIManager : ISaveSettings, ISaveable
 
     private void UpdateTimelineSlider(int _newTime)
     {
-        lock (gameManager.actionQueue)
-        {
-            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime - 1));
-        }
+        ActionQueueManager.Instance.EnqueueAction(() => UpdateValue(_newTime - 1));
     }
 
     void UpdateValue(float _value)

@@ -10,7 +10,7 @@ public enum EventType
     OverwriteToggle,
     SelectTool,
     ButtonHoverText,
-    onMouseHover
+    OnMouseHover
 }
 
 public static class EventManager

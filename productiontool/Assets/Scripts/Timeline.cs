@@ -11,11 +11,9 @@ public class Timeline : ISaveable, ISaveSettings
     private int BPM = 60;
     
     private readonly Timer timer;
-    private readonly GameManager gameManager;
     
-    public Timeline(GameManager _gameManager)
+    public Timeline()
     {
-        gameManager = _gameManager;
         currentTimePos = 0;
         
         int milliSeconds = 60000 / BPM;

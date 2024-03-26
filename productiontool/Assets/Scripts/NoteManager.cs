@@ -15,7 +15,6 @@ public class NoteManager : ISaveable, ISaveSettings
     private readonly Dictionary<Vector2Int, Note> noteDatabase;
     private readonly NoteVisualizer noteVisualizer;
     private readonly Transform noteParent;
-    private readonly GameManager gameManager;
     private readonly AudioManager audioManager;
     private readonly Stack<ICommand> commandStack = new Stack<ICommand>();
     private readonly Stack<ICommand> redoStack = new Stack<ICommand>();
@@ -24,11 +23,10 @@ public class NoteManager : ISaveable, ISaveSettings
     public static readonly Vector2Int MaxBound = new Vector2Int(10, -12);
     private int sampleRate = MusicLib.SampleRateLib[0];
 
-    public NoteManager(GameManager _gameManager, AudioManager _audioManager, GameObject _notePrefab,
+    public NoteManager(AudioManager _audioManager, GameObject _notePrefab,
         Transform _noteParent)
     {
         this.audioManager = _audioManager;
-        this.gameManager = _gameManager;
         this.noteParent = _noteParent;
 
         noteDatabase = new Dictionary<Vector2Int, Note>();
@@ -159,11 +157,9 @@ public class NoteManager : ISaveable, ISaveSettings
     }
     private void PlayNotesAtPosition(int _newTime)
     {
-        lock (gameManager.actionQueue)
-        {
-            gameManager.actionQueue.Enqueue(() => UpdateValue(_newTime - 1));
-        }
+        ActionQueueManager.Instance.EnqueueAction(() => UpdateValue(_newTime - 1));
     }
+    
     private bool IfMousePosOutBounds(Vector2Int _pos)
     {
         if (_pos.x < MinBound.x || _pos.x >= MaxBound.x) return false;

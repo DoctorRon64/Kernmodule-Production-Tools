@@ -2,8 +2,8 @@
 
 public class InputManager
 {
-    private NoteManager noteManager;
-    private ToolManager toolManager;
+    private readonly NoteManager noteManager;
+    private readonly ToolManager toolManager;
     private bool isInHoverText;
     
     public InputManager(NoteManager _noteManager, ToolManager _toolManager)

@@ -9,8 +9,8 @@ public enum EventType
     Repeat,
     OverwriteToggle,
     SelectTool,
-    ButtonHoverText,
-    OnMouseHover
+    InfoText,
+    InfoPopUpActive
 }
 
 public static class EventManager

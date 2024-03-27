@@ -5,7 +5,7 @@ public class InputManager
     private readonly NoteManager noteManager;
     private readonly ToolManager toolManager;
     private bool isInHoverText;
-    
+
     public InputManager(NoteManager _noteManager, ToolManager _toolManager)
     {
         noteManager = _noteManager;
@@ -16,7 +16,7 @@ public class InputManager
     {
         isInHoverText = _toggle;
     }
-    
+
     public void Update(Vector3 _mousePos)
     {
         if (isInHoverText) return;
@@ -45,7 +45,7 @@ public class InputManager
         {
             EventManager.InvokeEvent(EventType.SelectTool, 0);
         }
-        
+
         if (Input.GetKeyDown(KeyCode.B))
         {
             EventManager.InvokeEvent(EventType.SelectTool, 1);
@@ -62,20 +62,37 @@ public class InputManager
         if (toolManager == null) return;
         int whichToolIsSelected = toolManager.GetSelectedTool();
 
-        if (whichToolIsSelected == 1 && Input.GetMouseButton(0))
+        if (whichToolIsSelected == 1)
         {
-            Note existingNote = noteManager?.GetNoteAtMousePosition(_mousePos);
-            if (existingNote != null) return;
-            ICommand placeNoteCommand = new EditNoteCommand(noteManager, _mousePos, true);
-            noteManager?.ExecuteCommand(placeNoteCommand);
+            if (Input.GetMouseButton(0))
+            {
+                Note existingNote = noteManager?.GetNoteAtMousePosition(_mousePos);
+                if (existingNote != null) return;
+                ICommand placeNoteCommand = new EditNoteCommand(noteManager, _mousePos, true);
+                noteManager?.ExecuteCommand(placeNoteCommand);
+            }
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                EventManager.InvokeEvent(EventType.SelectTool, 2);
+            }
         }
 
-        if (whichToolIsSelected == 2 && Input.GetMouseButton(0))
+
+        if (whichToolIsSelected == 2)
         {
-            Note noteToRemove = noteManager?.GetNoteAtMousePosition(_mousePos);
-            if (noteToRemove == null) return;
-            ICommand removeNoteCommand = new EditNoteCommand(noteManager, _mousePos, false);
-            noteManager?.ExecuteCommand(removeNoteCommand);
+            if (Input.GetMouseButton(1) || Input.GetMouseButton(0))
+            {
+                Note noteToRemove = noteManager?.GetNoteAtMousePosition(_mousePos);
+                if (noteToRemove == null) return;
+                ICommand removeNoteCommand = new EditNoteCommand(noteManager, _mousePos, false);
+                noteManager?.ExecuteCommand(removeNoteCommand);
+            }
+
+            if (Input.GetMouseButtonUp(1))
+            {
+                EventManager.InvokeEvent(EventType.SelectTool, 1);
+            }
         }
     }
 }

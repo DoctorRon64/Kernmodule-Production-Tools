@@ -18,9 +18,9 @@ public class NoteManager : ISaveable, ISaveSettings
     private readonly AudioManager audioManager;
     private readonly Stack<ICommand> commandStack = new Stack<ICommand>();
     private readonly Stack<ICommand> redoStack = new Stack<ICommand>();
-    
-    public static readonly Vector2Int MinBound = new Vector2Int(-18, 0);
-    public static readonly Vector2Int MaxBound = new Vector2Int(10, -12);
+
+    private static readonly Vector2Int minBound = new Vector2Int(-18, 0);
+    private static readonly Vector2Int maxBound = new Vector2Int(10, -12);
     private int sampleRate = MusicLib.SampleRateLib[0];
 
     public NoteManager(AudioManager _audioManager, GameObject _notePrefab,
@@ -68,12 +68,12 @@ public class NoteManager : ISaveable, ISaveSettings
         }
         return null;
     }
-    
-    public void UpdateValue(int _timelinePosition)
+
+    private void UpdateValue(int _timelinePosition)
     {
         foreach (var note in noteDatabase.Values)
         {
-            int notePosX = note.Pos.x - MinBound.x;
+            int notePosX = note.Pos.x - minBound.x;
             if (notePosX == _timelinePosition)
             {
                 audioManager.PlayClip(note, sampleRate);
@@ -149,11 +149,10 @@ public class NoteManager : ISaveable, ISaveSettings
         return noteDatabase;
     }
     
-    //=============== Private Methods ===================================
     private bool IsGridPositionValid(Vector2Int _position)
     {
-        return !(_position.x < MinBound.x || _position.x > MaxBound.x ||
-                 _position.y > MinBound.y || _position.y < MaxBound.y);
+        return !(_position.x < minBound.x || _position.x > maxBound.x ||
+                 _position.y > minBound.y || _position.y < maxBound.y);
     }
     private void PlayNotesAtPosition(int _newTime)
     {
@@ -162,8 +161,8 @@ public class NoteManager : ISaveable, ISaveSettings
     
     private bool IfMousePosOutBounds(Vector2Int _pos)
     {
-        if (_pos.x < MinBound.x || _pos.x >= MaxBound.x) return false;
-        if (_pos.y < MinBound.y || _pos.y >= MaxBound.y) return false;
+        if (_pos.x < minBound.x || _pos.x >= maxBound.x) return false;
+        if (_pos.y < minBound.y || _pos.y >= maxBound.y) return false;
         return true;
     }
     private void PlaceNote(Vector2Int _pos)
@@ -188,9 +187,9 @@ public class NoteManager : ISaveable, ISaveSettings
         if (_ypos < 0 || _ypos >= MusicLib.FrequenciesLib.Length) return false;
         return MusicLib.FrequenciesLib[_ypos] != 0;
     }
-    private float GetFrequencyWithYPos(int _Ypos)
+    private float GetFrequencyWithYPos(int _ypos)
     {
-        return MusicLib.FrequenciesLib[_Ypos];
+        return MusicLib.FrequenciesLib[_ypos];
     }
     private void GetSampleRate(int _value)
     {
@@ -198,7 +197,6 @@ public class NoteManager : ISaveable, ISaveSettings
     }
 }
 
-//========================MUSIC LIBRARY======================================
 public static class MusicLib
 {
     public static readonly float[] FrequenciesLib = new float[]

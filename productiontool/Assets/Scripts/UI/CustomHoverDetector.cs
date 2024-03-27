@@ -12,12 +12,12 @@ public class CustomHoverDetector : MonoBehaviour, IPointerEnterHandler, IPointer
     
     public void OnPointerEnter(PointerEventData _eventData)
     {
-        EventManager.InvokeEvent(EventType.ButtonHoverText, hoverText);
-        EventManager.InvokeEvent(EventType.OnMouseHover, true);
+        EventManager.InvokeEvent(EventType.InfoText, hoverText);
+        EventManager.InvokeEvent(EventType.InfoPopUpActive, true);
     }
 
     public void OnPointerExit(PointerEventData _eventData)
     {
-        EventManager.InvokeEvent(EventType.OnMouseHover, false);
+        EventManager.InvokeEvent(EventType.InfoPopUpActive, false);
     }
 }

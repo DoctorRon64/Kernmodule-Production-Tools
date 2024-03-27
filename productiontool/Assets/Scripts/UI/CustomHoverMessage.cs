@@ -11,8 +11,8 @@ public class CustomHoverMessage
         hoverText = _hoverText;
         hoverText.gameObject.SetActive(false);
         
-        EventManager.AddListener<bool>(EventType.OnMouseHover, ToggleVisibility);
-        EventManager.AddListener<string>(EventType.ButtonHoverText, SetText);
+        EventManager.AddListener<bool>(EventType.InfoPopUpActive, ToggleVisibility);
+        EventManager.AddListener<string>(EventType.InfoText, SetText);
     }
 
     private void SetText(string _text)

@@ -35,12 +35,11 @@ public class SaveManager : ISaveSettings
 
     public void ExportToFile()
     {
-        WavExporter wavExporter = new WavExporter(
+        WavExport wavExporter = new WavExport(
             MusicLib.SampleRateLib[settingsFile.SampleRate],
-            CalculateTimelineDuration(gameManager.GetTimelineBpm()),
+             CalculateTimelineDuration(gameManager.GetTimelineBpm()),
             gameManager.GetTimelineBpm(),
-            noteManager?.GetNoteDictionary()//,
-            //lastNamedFile
+            noteManager?.GetNoteDictionary()
         );
     }
 
